@@ -1,0 +1,32 @@
+.msg {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    width: fit-content;
+    column-gap: 15px;
+}
+
+.msg > img {
+    height: 50px;
+    width: 50px;
+    border-radius: 6px;
+    align-self: flex-start;
+}
+
+.msg-text {
+    background-color: #f1f1f1;
+    max-width: 450px;
+    border-radius: 15px;
+    padding: 10px 20px;
+    margin: 0;
+}
+
+.sent{
+    align-self: flex-end;
+}
+
+.sent > .msg-text {
+    background-color: #000080;
+    color: white;
+    order: -1;
+}
