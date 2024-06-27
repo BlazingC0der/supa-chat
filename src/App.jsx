@@ -1,18 +1,15 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import "./App.css"
 import "firebase/firestore"
 import "firebase/auth"
-import ChatBox from "./chatbox"
-
-// Import the necessary components from the v9 SDK
 import { initializeApp } from "firebase/app"
 import {
     getAuth,
-    signInWithPopup,
     signOut,
-    GoogleAuthProvider
+    signInWithCustomToken
 } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
+import axios from "axios"
 
 const firebaseConfig = {
     apiKey: "AIzaSyA2xWMLsZu35nSeV4VJZQhhYXOoZC-66sw",
@@ -31,48 +28,52 @@ const firestore = getFirestore()
 
 function App() {
     const [user, setUser] = useState(null)
+    const username = useRef("")
+    const password = useRef("")
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((currentUser) => {
             setUser(currentUser)
         })
+        console.log("auth", auth)
         return unsubscribe
     }, [auth])
 
-    const signInWithGoogle = async () => {
-        const provider = new GoogleAuthProvider()
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                // This gives you a Google Access Token. You can use it to access the Google API.
-                const credential =
-                    GoogleAuthProvider.credentialFromResult(result)
-                const token = credential.accessToken
-                // The signed-in user info.
-                console.log("User Info: ", auth.currentUser)
-                sessionStorage.setItem("uid", auth.currentUser.uid)
-            })
-            .catch((error) => {
-                // Handle Errors here.
-                const errorCode = error.code
-                const errorMessage = error.message
-                // The email of the user's account used.
-                const email = error.customData.email
-                // The AuthCredential type that was used.
-                const credential = GoogleAuthProvider.credentialFromError(error)
-                console.error("Error: ", errorMessage)
-            })
+    const signIn = async (e) => {
+        e.preventDefault()
+        try {
+            const res = await axios.post(
+                "https://cc.dev.startupearly.com/api/token/",
+                {
+                    username: username.current,
+                    password: password.current
+                }
+            )
+            console.log("access token", res)
+            signInWithCustomToken(auth, res.data.access)
+                .then((userCredential) => {
+                    // Signed in
+                    const user = userCredential.user
+                    setUser(user)
+                    console.log("User signed in:", user)
+                })
+                .catch((error) => {
+                    const errorCode = error.code
+                    const errorMessage = error.message
+                    console.error("Error signing in:", errorCode, errorMessage)
+                })
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     return (
         <div className="App">
             {auth.currentUser && (
                 <header>
-                        <button
-                            className="sign-out"
-                            onClick={() => signOut(auth)}
-                        >
-                            Sign Out
-                        </button>
+                    <button className="sign-out" onClick={() => signOut(auth)}>
+                        Sign Out
+                    </button>
                 </header>
             )}
             <section
@@ -86,9 +87,27 @@ function App() {
                 {user ? (
                     <ChatBox auth={auth} firestore={firestore} />
                 ) : (
-                    <button className="sign-in" onClick={signInWithGoogle}>
-                        Sign in with Google
-                    </button>
+                    <>
+                        <form onSubmit={signIn} className="login-form">
+                            <input
+                                type="email"
+                                name="email"
+                                id="email"
+                                onChange={(e) =>
+                                    (username.current = e.target.value)
+                                }
+                            />
+                            <input
+                                type="password"
+                                name="pwd"
+                                id="pwd"
+                                onChange={(e) =>
+                                    (password.current = e.target.value)
+                                }
+                            />
+                            <input type="submit" value="Sign In" />
+                        </form>
+                    </>
                 )}
             </section>
         </div>

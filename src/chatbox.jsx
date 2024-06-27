@@ -13,7 +13,7 @@ import "./chatbox.css"
 
 const ChatBox = (props) => {
     const [messages, setMessages] = useState([])
-    const [formValue, setFormValue] = useState("")
+    const msgText = useRef()
     const scrollMarker = useRef()
     const messagesRef = useMemo(
         () => collection(props.firestore, "messages"),
@@ -44,13 +44,13 @@ const ChatBox = (props) => {
 
         const { uid, displayName, photoURL } = props.auth.currentUser
         await addDoc(messagesRef, {
-            text: formValue,
+            text: msgText.current,
             createdAt: serverTimestamp(),
             uid,
             displayName,
             photoURL
         })
-        setFormValue("")
+        msgText.current=""
         scrollMarker.current.scrollIntoView({ behavior: "smooth" })
     }
 
@@ -76,13 +76,14 @@ const ChatBox = (props) => {
                 )}
                 <span ref={scrollMarker}></span>
             </main>
-            <form onSubmit={sendMessage}>
+            <form onSubmit={sendMessage} className="msg-form">
                 <input
-                    value={formValue}
-                    onChange={(e) => setFormValue(e.target.value)}
+                    value={msgText.current}
+                    onChange={(e) => msgText.current = e.target.value}
                     placeholder="Type a message"
+                    className="msg-input"
                 />
-                <input type="submit" disabled={!formValue} value={"Send"} />
+                <input type="submit" disabled={!msgText.current} value={"Send"} className="msg-submit"/>
             </form>
         </>
     )

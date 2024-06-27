@@ -31,3 +31,13 @@ header {
     width: 10vw;
     margin: initial;
 }
+
+.login-form {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    row-gap: 20px;
+}

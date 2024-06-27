@@ -8,7 +8,7 @@
     padding: 4px 10px;
 }
 
-form {
+.msg-form {
     width: 90%;
     height: 10%;
     border-radius: 15px;
@@ -19,7 +19,7 @@ form {
     align-items: center;
 }
 
-input {
+.msg-input {
     width: 95%;
     height: 100%;
     border: none;
@@ -28,7 +28,7 @@ input {
     outline: none;
 }
 
-input[type="submit"] {
+.msg-submit {
     color: #000080;
     background-color: transparent;
     width: 5%;
