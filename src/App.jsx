@@ -108,7 +108,11 @@ function App() {
                         </button>
                     </header>
                     <section className="chats">
-                        <ChatList selectChat={setSelectedChat} auth={auth} />
+                        <ChatList
+                            selectChat={setSelectedChat}
+                            auth={auth}
+                            firestore={firestore}
+                        />
                         <ChatBox
                             auth={auth}
                             firestore={firestore}

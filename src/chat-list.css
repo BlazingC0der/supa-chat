@@ -28,3 +28,17 @@
     margin-right: 10px;
     border-radius: 10px;
 }
+
+.user-chat {
+    height: 70%;
+    display: flex;
+    flex-direction: column;
+    width: 65%;
+}
+
+.latest-msg {
+    color: grey;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
