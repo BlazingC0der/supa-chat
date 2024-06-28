@@ -1,4 +1,4 @@
-.chats {
+.msgs {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -20,22 +20,30 @@ form {
 }
 
 input {
-    width: 95%;
     height: 100%;
     border: none;
     font-size: 20px;
     padding-left: 10px;
     outline: none;
+    flex-grow: 1;
 }
 
-input[type="submit"] {
+button[type="submit"] {
     color: #000080;
     background-color: transparent;
-    width: 5%;
     height: 95%;
     border: none;
     cursor: pointer;
     border-radius: 4px;
     text-align: center;
     padding: 0;
+    width: fit-content;
+}
+
+.chat-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: center;
+    width: 70%;
 }

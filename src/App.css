@@ -1,6 +1,8 @@
 .App {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .sign-in,
@@ -30,4 +32,9 @@ header {
     height: 7vh;
     width: 10vw;
     margin: initial;
+}
+
+.chats{
+    display: flex;
+    height: 90vh;
 }

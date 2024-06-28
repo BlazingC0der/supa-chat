@@ -5,9 +5,7 @@ import {
     query,
     orderBy,
     limit,
-    onSnapshot,
-    addDoc,
-    serverTimestamp
+    onSnapshot
 } from "firebase/firestore"
 import "./chatbox.css"
 
@@ -16,47 +14,47 @@ const ChatBox = (props) => {
     const [formValue, setFormValue] = useState("")
     const scrollMarker = useRef()
     const messagesRef = useMemo(
-        () => collection(props.firestore, "messages"),
-        [props.firestore]
+        () =>
+            props.selectedChat
+                ? collection(props.firestore, props.selectedChat)
+                : null,
+        [props.selectedChat]
     )
 
     useEffect(() => {
-        console.log("new user", props.auth);
+        console.log("new user", props.auth)
         scrollMarker.current.scrollIntoView({ behavior: "smooth" })
     }, [props.auth])
 
-
     useEffect(() => {
-        const messageQuery = query(messagesRef, orderBy("createdAt"), limit(25))
-        const unsubscribe = onSnapshot(messageQuery, (querySnapshot) => {
-            const newMessages = querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data()
-            }))
-            console.log("new", newMessages)
-            setMessages(newMessages)
-        })
-        return unsubscribe
+        if (messagesRef) {
+            const messageQuery = query(messagesRef, orderBy("createdAt"), limit(25))
+            const unsubscribe = onSnapshot(messageQuery, (querySnapshot) => {
+                const newMessages = querySnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data()
+                }))
+                console.log("new", newMessages)
+                setMessages(newMessages)
+            })
+            return unsubscribe
+        }
     }, [messagesRef])
 
     const sendMessage = async (e) => {
         e.preventDefault()
-
-        const { uid, displayName, photoURL } = props.auth.currentUser
-        await addDoc(messagesRef, {
-            text: formValue,
-            createdAt: serverTimestamp(),
-            uid,
-            displayName,
-            photoURL
-        })
-        setFormValue("")
-        scrollMarker.current.scrollIntoView({ behavior: "smooth" })
+        try {
+            await props.send(formValue)
+            setFormValue("")
+            scrollMarker.current.scrollIntoView({ behavior: "smooth" })
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     return (
-        <>
-            <main className="chats">
+        <main className="chat-box">
+            <div className="msgs">
                 {messages.map((msg, i) =>
                     i > 0 && messages[i - 1].uid !== msg.uid ? (
                         <ChatMessage
@@ -75,16 +73,18 @@ const ChatBox = (props) => {
                     )
                 )}
                 <span ref={scrollMarker}></span>
-            </main>
+            </div>
             <form onSubmit={sendMessage}>
                 <input
                     value={formValue}
                     onChange={(e) => setFormValue(e.target.value)}
                     placeholder="Type a message"
                 />
-                <input type="submit" disabled={!formValue} value={"Send"} />
+                <button type="submit" disabled={!formValue}>
+                    <span class="material-symbols-rounded">send</span>
+                </button>
             </form>
-        </>
+        </main>
     )
 }
 
