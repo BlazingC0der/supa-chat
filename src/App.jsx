@@ -10,6 +10,7 @@ import {
 } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import axios from "axios"
+import ChatBox from './chatbox';
 
 const firebaseConfig = {
     apiKey: "AIzaSyA2xWMLsZu35nSeV4VJZQhhYXOoZC-66sw",
@@ -17,7 +18,7 @@ const firebaseConfig = {
     projectId: "chat-app-ca35e",
     storageBucket: "chat-app-ca35e.appspot.com",
     messagingSenderId: "995366670804",
-    appId: "1:995366670804:web:b57c8355e838db6c548641",
+    appId: "1:995366670804:web:b5t7c8355e838db6c548641",
     measurementId: "G-HHZDGQK3Z1"
 }
 
@@ -49,8 +50,8 @@ function App() {
                     password: password.current
                 }
             )
-            console.log("access token", res)
-            signInWithCustomToken(auth, res.data.access)
+            console.log("user authenticated", res.data)
+            signInWithCustomToken(auth, res.data.firebase_token)
                 .then((userCredential) => {
                     // Signed in
                     const user = userCredential.user
