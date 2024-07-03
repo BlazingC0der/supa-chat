@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "leapstartupearly-82067",
+  "private_key_id": "5aa4a4a8caaabb854bfec30505af4ce18686035a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCbxqHokG+JETuC\nbgrkoU7qtUnlhWiDxAPdsxPMbC4WMAS1/imXJXH75yhTpBEa6J+jGOvY98C8bdpk\neODmxHqDMvP9fMdL7mLv3+iEpG9xPxnX8VO93lEmaCNNbRiOhTk+Y3i8LtLxBcgM\nRoa+meodpcujskyINMaKNu3wy/xU14PW4pPc9qTsDXOjLB7+rsR6RJSo5h7AbUvR\ndl7Tn5R4p/lMkMyOM4EJ0e6sGQTdodlqBXn/5i1cXR8PlQ8tzQX6GUdDyPrAALsF\nzQo4KnZdQkC4CuQ2RgKja9fZKgGo7/lWkVLDHEkv1Xyb7Z7W5cSv6uX/SqM39b7u\n/DITnaQDAgMBAAECggEAEvNkZrtiOO3AlxqrDEBhg4/gIwzf955k4qzdUj0GPaBu\n2khxfS1K2Mc43TVe+APnySWIKleNpNQabFGro/dazijojOSIBwFDxlnaMCokUpsc\nxOwGG4RMdrHW5Z2e41ZqwzUXuZEFYYP/X8WZW95eoGe3RpKzg83Of38KOFqgjR46\n7rCruo7a3IKytrXjUWe2JASYF10IUlsD2mN8WZRGx9A8bCh8gODSZzIwN0ZagQqC\ns2RqyZhy71v878AtXV0OV9+DHhaITFHEDQt5pn4qEohyJkRWzbki2IL86Hska/2r\nDJTXvqapceWJcevra5EQvpO5sfExcZbIdlYCVNubtQKBgQDJAPyFwuCOZlhdoYNJ\nIaFQGaT8zbGIUodD/yLIauO6ZnOLBnmCem71bJ08bJq+eNC1tk5Q1qgGm/VzPjqk\nqQiV+U6WjLy9bfrHPZQyPWhXunHxYK4ZsIFspNC5+kVFfWJ0L4uOCs4WEVL38YSf\nsjV4FO0K/o6wME3FGQmCWkZlZwKBgQDGZbjwa6KcRB9shDpHGOiAQBsAMinV+gcT\nI0STAkJUOMGru+ANIL7Thuyx0NPFux7G1cjj0N2iz53Nh6uFEk0Y/sdk4YdSjflg\nAv8uJodighayobH8HOmVgheo1ZBvlfbxigdj4ne2rcESW9wXWp3DKHsm+mmLj2fn\n8npQocpvBQKBgB8lSvvDDZ6jFzAy9a/gSSmrP5h4mvi/qPwNTat2fKEGfQLe1vcz\n13up/9c8EOJQwC5X+FyoVlLn2amoy9d15cGvZtEHL7u+jexPi2YZg9CMMFmxnGiY\npAVcqIcY06EH47iTIXG6FOLwfkWzI9TG/WgE/hIFDcEZSwOudH3BVUUjAoGAZ6Tq\niYbha1tXQzyMqWnExIM419Bc9LDqkz/gaiBLAG6qFopOkO0jY6Pf8UDT8T9A48T5\nbrJFpvFpUd7nZtxZtI4dIoGDTUhoF5VZNAXiwj6NlwJL1hZQnM9ahtQS4YhpemOO\nWssLmT6KV4nvn6+yLSrvszwseUEQmiadaZQsCfUCgYEAx+e09XTOkTgOz1Iztbgf\n/nGSxfEmLcVIJYLJVA2l46TAbgGfCkizDbDb/7yos4tyGKi/VN3VToSDcMy6MVPf\nAn4BB02Kt1vqNA2JHIjItrLi36yHE8GnpmDuG3B6bMlCNuJ5u5XPQg1hk6cP8WdL\nWoEPgA9gTC8lvjw5Dvl6ouY=\n-----END PRIVATE KEY-----\n",
+  "client_email": "sue-chat@leapstartupearly-82067.iam.gserviceaccount.com",
+  "client_id": "111988451118567707727",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sue-chat%40leapstartupearly-82067.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
