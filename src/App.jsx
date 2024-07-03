@@ -3,14 +3,11 @@ import "./App.css"
 import "firebase/firestore"
 import "firebase/auth"
 import { initializeApp } from "firebase/app"
-import {
-    getAuth,
-    signOut,
-    signInWithCustomToken
-} from "firebase/auth"
+import { getAuth, signOut, signInWithCustomToken } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import axios from "axios"
-import ChatBox from './chatbox';
+import ChatBox from "./chatbox"
+import ChatList from './chat-list';
 
 const firebaseConfig = {
     apiKey: "AIzaSyA2xWMLsZu35nSeV4VJZQhhYXOoZC-66sw",
@@ -23,12 +20,13 @@ const firebaseConfig = {
 }
 
 // Initialize Firebase app
-const app = initializeApp(firebaseConfig)
+initializeApp(firebaseConfig)
 const auth = getAuth()
 const firestore = getFirestore()
 
 function App() {
     const [user, setUser] = useState(null)
+    const [selectedChat, setSelectedChat] = useState(null)
     const username = useRef("")
     const password = useRef("")
 
@@ -68,9 +66,26 @@ function App() {
         }
     }
 
+    const sendMsg = async (text) => {
+        const { uid, displayName, photoURL } = auth.currentUser
+        try {
+            // Add a new document with a generated ID
+            await addDoc(collection(firestore, selectedChat), {
+                text,
+                createdAt: serverTimestamp(),
+                uid,
+                displayName,
+                photoURL
+            })
+            console.log("Document successfully written!")
+        } catch (error) {
+            console.error("Error writing document: ", error)
+        }
+    }
+
     return (
         <div className="App">
-            {auth.currentUser && (
+            {user && (
                 <header>
                     <button className="sign-out" onClick={() => signOut(auth)}>
                         Sign Out
@@ -86,7 +101,19 @@ function App() {
                 }}
             >
                 {user ? (
-                    <ChatBox auth={auth} firestore={firestore} />
+                    <>
+                        <ChatList
+                            selectChat={setSelectedChat}
+                            auth={auth}
+                            firestore={firestore}
+                        />
+                        <ChatBox
+                            auth={auth}
+                            firestore={firestore}
+                            send={sendMsg}
+                            selectedChat={selectedChat}
+                        />
+                    </>
                 ) : (
                     <>
                         <form onSubmit={signIn} className="login-form">
