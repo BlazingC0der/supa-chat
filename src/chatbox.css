@@ -20,12 +20,20 @@
 }
 
 .msg-input {
-    width: 95%;
     height: 100%;
     border: none;
     font-size: 20px;
     padding-left: 10px;
     outline: none;
+    flex-grow: 1;
+}
+
+.msg-form {
+    display: flex;
+    justify-content: center;
+    column-gap: 5px;
+    width: 100%;
+    align-items: center;
 }
 
 .msg-send-btn {
