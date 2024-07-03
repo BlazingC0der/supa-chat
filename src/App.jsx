@@ -7,7 +7,7 @@ import { getAuth, signOut, signInWithCustomToken } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
 import axios from "axios"
 import ChatBox from "./chatbox"
-import ChatList from './chat-list';
+import ChatList from "./chat-list"
 
 const firebaseConfig = {
     apiKey: "AIzaSyA2xWMLsZu35nSeV4VJZQhhYXOoZC-66sw",
@@ -92,14 +92,7 @@ function App() {
                     </button>
                 </header>
             )}
-            <section
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "90vh",
-                    alignItems: "center"
-                }}
-            >
+            <section className="chats">
                 {user ? (
                     <>
                         <ChatList
