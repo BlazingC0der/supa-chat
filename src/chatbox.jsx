@@ -11,7 +11,7 @@ import "./chatbox.css"
 
 const ChatBox = (props) => {
     const [messages, setMessages] = useState([])
-    const msgText = useRef()
+    const [formValue, setFormValue] = useState("")
     const scrollMarker = useRef()
     const fileInput = useRef()
     const messagesRef = useMemo(
@@ -49,8 +49,8 @@ const ChatBox = (props) => {
     const sendMessage = async (e) => {
         e.preventDefault()
         try {
-            await props.send(msgText.current)
-            msgText.current.value = ""
+            await props.send(formValue)
+            setFormValue("")
             scrollMarker.current.scrollIntoView({ behavior: "smooth" })
         } catch (error) {
             console.error(error)
@@ -97,14 +97,14 @@ const ChatBox = (props) => {
                 />
                 <div className="msg-box">
                     <input
-                        value={msgText.current}
-                        onChange={(e) => (msgText.current = e.target.value)}
+                        value={formValue}
+                        onChange={(e) => setFormValue(e.target.value)}
                         placeholder="Type a message"
                         className="msg-input"
                     />
                     <button
                         type="submit"
-                        disabled={!msgText.current}
+                        disabled={!formValue}
                         className="msg-send-btn"
                     >
                         <span className="material-symbols-rounded">send</span>

@@ -19,17 +19,16 @@
     align-items: center;
 }
 
-input {
+.msg-input {
     width: 95%;
     height: 100%;
     border: none;
     font-size: 20px;
     padding-left: 10px;
     outline: none;
-    flex-grow: 1;
 }
 
-input[type="submit"] {
+.msg-submit {
     color: #000080;
     background-color: transparent;
     height: 95%;
