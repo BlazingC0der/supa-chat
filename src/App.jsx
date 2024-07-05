@@ -1,10 +1,19 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, createContext } from "react"
 import "./App.css"
 import "firebase/firestore"
 import "firebase/auth"
 import { initializeApp } from "firebase/app"
 import { getAuth, signOut, signInWithCustomToken } from "firebase/auth"
-import { getFirestore } from "firebase/firestore"
+import {
+    getFirestore,
+    addDoc,
+    serverTimestamp,
+    collection,
+    doc,
+    updateDoc,
+    arrayUnion,
+    setDoc
+} from "firebase/firestore"
 import axios from "axios"
 import ChatBox from "./chatbox"
 import ChatList from "./chat-list"
@@ -19,6 +28,8 @@ const firebaseConfig = {
     measurementId: "G-HHZDGQK3Z1"
 }
 
+export const authContext = createContext()
+
 // Initialize Firebase app
 initializeApp(firebaseConfig)
 const auth = getAuth()
@@ -29,6 +40,7 @@ function App() {
     const [selectedChat, setSelectedChat] = useState(null)
     const username = useRef("")
     const password = useRef("")
+    const authTkn = useRef("")
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -42,19 +54,43 @@ function App() {
         e.preventDefault()
         try {
             const res = await axios.post(
-                "https://cc.dev.startupearly.com/api/token/",
+                `${import.meta.env.VITE_API_URL}token/`,
                 {
                     username: username.current,
                     password: password.current
                 }
             )
             console.log("user authenticated", res.data)
+            authTkn.current = res.data.django_token.access
             signInWithCustomToken(auth, res.data.firebase_token)
-                .then((userCredential) => {
+                .then(async (userCredential) => {
                     // Signed in
                     const user = userCredential.user
-                    setUser(user)
-                    console.log("User signed in:", user)
+                    try {
+                        const userInfo = await axios.get(
+                            `${import.meta.env.VITE_API_URL}user/${user.uid}/`,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${res.data.django_token.access}`
+                                }
+                            }
+                        )
+                        setUser(user)
+                        console.log("User signed in:", user)
+                        sessionStorage.setItem("uid", user.uid)
+                        sessionStorage.setItem(
+                            "photoURL",
+                            userInfo.data.user.image
+                        )
+                        sessionStorage.setItem(
+                            "displayName",
+                            userInfo.data.user.first_name +
+                                " " +
+                                userInfo.data.user.last_name
+                        )
+                    } catch (error) {
+                        console.error(error)
+                    }
                 })
                 .catch((error) => {
                     const errorCode = error.code
@@ -67,15 +103,25 @@ function App() {
     }
 
     const sendMsg = async (text) => {
-        const { uid, displayName, photoURL } = auth.currentUser
+        const { uid } = auth.currentUser
         try {
-            // Add a new document with a generated ID
+            const dirColRef = collection(firestore, "chat-driectory")
+            const dirDocRefSelf = doc(dirColRef, sessionStorage.getItem("uid"))
+            const dirDocRefOtherUser = doc(
+                dirColRef,
+                sessionStorage.getItem("other-user-uid")
+            )
+            await setDoc(dirDocRefSelf, {
+                chats: [sessionStorage.getItem("other-user-uid")]
+            })
+            await setDoc(dirDocRefOtherUser, {
+                chats: [sessionStorage.getItem("uid")]
+            })
+            // adding msg doc
             await addDoc(collection(firestore, selectedChat), {
                 text,
                 createdAt: serverTimestamp(),
-                uid,
-                displayName,
-                photoURL
+                uid
             })
             console.log("Document successfully written!")
         } catch (error) {
@@ -87,14 +133,20 @@ function App() {
         <div className="App">
             {user && (
                 <header>
-                    <button className="sign-out" onClick={() => signOut(auth)}>
+                    <button
+                        className="sign-out"
+                        onClick={() => {
+                            sessionStorage.clear()
+                            signOut(auth)
+                        }}
+                    >
                         Sign Out
                     </button>
                 </header>
             )}
             <section className="chats">
                 {user ? (
-                    <>
+                    <authContext.Provider value={authTkn.current}>
                         <ChatList
                             selectChat={setSelectedChat}
                             auth={auth}
@@ -106,7 +158,7 @@ function App() {
                             send={sendMsg}
                             selectedChat={selectedChat}
                         />
-                    </>
+                    </authContext.Provider>
                 ) : (
                     <>
                         <form onSubmit={signIn} className="login-form">

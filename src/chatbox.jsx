@@ -14,13 +14,11 @@ const ChatBox = (props) => {
     const [formValue, setFormValue] = useState("")
     const scrollMarker = useRef()
     const fileInput = useRef()
-    const messagesRef = useMemo(
-        () =>
-            props.selectedChat
-                ? collection(props.firestore, props.selectedChat)
-                : null,
-        [props.selectedChat]
-    )
+    const messagesRef = useMemo(() => {
+        return props.selectedChat
+            ? collection(props.firestore, props.selectedChat)
+            : null
+    }, [props.selectedChat])
 
     useEffect(() => {
         console.log("new user", props.auth)
@@ -39,7 +37,7 @@ const ChatBox = (props) => {
                     id: doc.id,
                     ...doc.data()
                 }))
-                console.log("new", newMessages)
+                console.log("new msgs", newMessages)
                 setMessages(newMessages)
             })
             return unsubscribe
@@ -66,14 +64,14 @@ const ChatBox = (props) => {
                             key={msg.id}
                             text={msg.text}
                             uid={msg.uid}
-                            photoURL={msg.photoURL}
+                            showProfileImg
                         />
                     ) : (
                         <ChatMessage
                             key={msg.id}
                             text={msg.text}
                             uid={msg.uid}
-                            photoURL={i === 0 ? msg.photoURL : ""}
+                            showProfileImg={i === 0}
                         />
                     )
                 )}

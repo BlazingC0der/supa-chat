@@ -7,8 +7,14 @@ const ChatMessage = (props) => {
     return (
         <>
             <div className={`msg ${messageClass}`}>
-                {props.photoURL ? (
-                    <img src={props.photoURL} />
+                {props.showProfileImg ? (
+                    <img
+                        src={
+                            messageClass === "sent"
+                                ? sessionStorage.getItem("photoURL")
+                                : sessionStorage.getItem("other-user-photoURL")
+                        }
+                    />
                 ) : (
                     <div style={{ height: "50px", width: "50px" }}></div>
                 )}
