@@ -7,6 +7,7 @@ import {
     limit,
     onSnapshot
 } from "firebase/firestore"
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import "./chatbox.css"
 
 const ChatBox = (props) => {
@@ -55,6 +56,24 @@ const ChatBox = (props) => {
         }
     }
 
+    const sendFileMessage = (e) => {
+        const storage = getStorage()
+        const storageRef = ref(storage, e.target.files[0].name)
+        // 'file' comes from the Blob or File API
+        uploadBytes(storageRef, e.target.files[0]).then((snapshot) => {
+            console.log("Uploaded a blob or file!", snapshot)
+            getDownloadURL(storageRef)
+                .then((url) => {
+                    console.log("File available at", url)
+                    props.send(url, false)
+                    // Do something with the URL, e.g., display it or save it to a database
+                })
+                .catch((error) => {
+                    console.error("Error getting download URL", error)
+                })
+        })
+    }
+
     return (
         <main className="chat-box">
             <div className="msgs">
@@ -91,7 +110,7 @@ const ChatBox = (props) => {
                     id="file-msg"
                     style={{ display: "none" }}
                     ref={fileInput}
-                    onChange={(e) => console.log("file", e.target.files[0])}
+                    onChange={sendFileMessage}
                 />
                 <div className="msg-box">
                     <input

@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, createContext } from "react"
 import "./App.css"
-import "firebase/firestore"
-import "firebase/auth"
 import { initializeApp } from "firebase/app"
 import { getAuth, signOut, signInWithCustomToken } from "firebase/auth"
 import {
@@ -10,8 +8,6 @@ import {
     serverTimestamp,
     collection,
     doc,
-    updateDoc,
-    arrayUnion,
     setDoc
 } from "firebase/firestore"
 import axios from "axios"
@@ -102,7 +98,7 @@ function App() {
         }
     }
 
-    const sendMsg = async (text) => {
+    const sendMsg = async (msg, textFlag = true) => {
         const { uid } = auth.currentUser
         try {
             const dirColRef = collection(firestore, "chat-driectory")
@@ -118,11 +114,17 @@ function App() {
                 chats: [sessionStorage.getItem("uid")]
             })
             // adding msg doc
-            await addDoc(collection(firestore, selectedChat), {
-                text,
-                createdAt: serverTimestamp(),
-                uid
-            })
+            textFlag
+                ? await addDoc(collection(firestore, selectedChat), {
+                      text: msg,
+                      createdAt: serverTimestamp(),
+                      uid
+                  })
+                : await addDoc(collection(firestore, selectedChat), {
+                      file: msg,
+                      createdAt: serverTimestamp(),
+                      uid
+                  })
             console.log("Document successfully written!")
         } catch (error) {
             console.error("Error writing document: ", error)

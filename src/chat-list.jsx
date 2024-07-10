@@ -123,7 +123,9 @@ const ChatList = (props) => {
                 docSnap.data().chats.forEach(async (chat) => {
                     try {
                         const res = await axios.get(
-                            `${import.meta.env.VITE_API_URL}user/${chat}/`,
+                            `${
+                                import.meta.env.VITE_DEV_API_URL
+                            }profile/${chat}/`,
                             { headers: { Authorization: `Bearer ${authTkn}` } }
                         )
                         console.log("chat user", res.data)
