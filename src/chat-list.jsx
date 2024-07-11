@@ -12,15 +12,12 @@ import {
 } from "firebase/firestore"
 import axios from "axios"
 import { authContext } from "./App"
+import Searchbar from "./searchbar"
 
 const ChatList = (props) => {
     const selectedUser = useRef(null)
     // const [selectedUserIndex, setSelectedUserIndex] = useState(NaN)
     const [users, setUsers] = useState([])
-
-    useEffect(() => {
-        console.log("users update", users)
-    }, [users])
 
     const authTkn = useContext(authContext)
 
@@ -78,18 +75,17 @@ const ChatList = (props) => {
                     orderBy("createdAt", "desc"),
                     limit(1)
                 )
-                onSnapshot(
-                    messageQuery,
-                    (querySnapshot) => {
-                        const latestMsg = querySnapshot.docs.map((doc) => ({
-                            id: doc.id,
-                            ...doc.data()
-                        }))
-                        const tempUsers = [...users]
-                        tempUsers[i].msg = latestMsg[0]?.text
-                        setUsers([...tempUsers])
-                    }
-                )
+                onSnapshot(messageQuery, (querySnapshot) => {
+                    const latestMsg = querySnapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }))
+                    const tempUsers = [...users]
+                    tempUsers[i].msg = latestMsg[0].text
+                        ? latestMsg[0]?.text
+                        : latestMsg[0]?.filename
+                    setUsers([...tempUsers])
+                })
             })
         }
     }, [msgRefs])
@@ -148,6 +144,7 @@ const ChatList = (props) => {
 
     return (
         <section className="chat-list">
+            <Searchbar />
             {users.map((user, i) => (
                 <div
                     className="chat-item"
