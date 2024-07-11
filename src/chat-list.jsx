@@ -16,26 +16,11 @@ import { authContext } from "./App"
 const ChatList = (props) => {
     const selectedUser = useRef(null)
     // const [selectedUserIndex, setSelectedUserIndex] = useState(NaN)
-    const [users, setUsers] = useState([
-        {
-            name: `Prince Vegeta`,
-            uid: "gRzr5dFvCHtATXWe",
-            photoURL:
-                "https://static.vecteezy.com/system/resources/previews/036/594/092/large_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg"
-        },
-        {
-            name: `Goku Kakarot`,
-            uid: "gRzr5dFvCHtATXWc",
-            photoURL:
-                "https://static.vecteezy.com/system/resources/previews/036/594/092/large_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg"
-        },
-        {
-            name: `Beerus Kitty`,
-            uid: "gRzr5dFvCHtATXWd",
-            photoURL:
-                "https://static.vecteezy.com/system/resources/previews/036/594/092/large_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg"
-        }
-    ])
+    const [users, setUsers] = useState([])
+
+    useEffect(() => {
+        console.log("users update", users)
+    }, [users])
 
     const authTkn = useContext(authContext)
 
@@ -114,34 +99,40 @@ const ChatList = (props) => {
             // Reference to the chat-dir collection
             const colRef = collection(props.firestore, "chat-directory")
             // Reference to the document containing user's chats
-            const docRef = doc(colRef, sessionStorage.getItem("uid"))
+            const docRef = doc(colRef, props.user.uid)
             // Fetching the document
             const docSnap = await getDoc(docRef)
             if (docSnap.exists()) {
-                const tempUsers = [...users]
-                console.log("chats", docSnap.data().chats)
-                docSnap.data().chats.forEach(async (chat) => {
-                    try {
-                        const res = await axios.get(
-                            `${
-                                import.meta.env.VITE_DEV_API_URL
-                            }profile/${chat}/`,
-                            { headers: { Authorization: `Bearer ${authTkn}` } }
-                        )
-                        console.log("chat user", res.data)
-                        tempUsers.push({
-                            name: `${res.data.user.first_name} ${res.data.user.last_name}`,
-                            uid: res.data.user.id,
-                            photoURL: res.data.user.image
-                        })
-                    } catch (err) {
-                        console.error(err)
-                    }
-                })
-                setUsers([...tempUsers])
+                const chatUids = docSnap.data().chats
+                const tempUsers = await Promise.all(
+                    chatUids.map(async (uid) => {
+                        try {
+                            const res = await axios.get(
+                                `${
+                                    import.meta.env.VITE_DEV_API_URL
+                                }profile/${uid}`,
+                                {
+                                    headers: {
+                                        Authorization: `Bearer ${authTkn}`
+                                    }
+                                }
+                            )
+                            return {
+                                name: res.data.name,
+                                uid,
+                                photoURL: res.data.avatar
+                            }
+                        } catch (err) {
+                            console.error(err)
+                            return null
+                        }
+                    })
+                )
+                // Filtering out null responses due to errors
+                setUsers([...tempUsers.filter((user) => user !== null)])
             }
         })()
-    }, [props.auth])
+    }, [props.user])
 
     const showChat = (e, index) => {
         selectedUser.current &&
@@ -158,7 +149,11 @@ const ChatList = (props) => {
     return (
         <section className="chat-list">
             {users.map((user, i) => (
-                <div className="chat-item" onClick={(e) => showChat(e, i)}>
+                <div
+                    className="chat-item"
+                    key={user.uid}
+                    onClick={(e) => showChat(e, i)}
+                >
                     <img
                         src={user.photoURL}
                         alt="user avatar"

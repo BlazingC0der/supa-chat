@@ -8,7 +8,9 @@ import {
     serverTimestamp,
     collection,
     doc,
-    setDoc
+    setDoc,
+    updateDoc,
+    arrayUnion
 } from "firebase/firestore"
 import axios from "axios"
 import ChatBox from "./chatbox"
@@ -71,7 +73,6 @@ function App() {
                                 }
                             }
                         )
-                        setUser(user)
                         console.log("User signed in:", user)
                         sessionStorage.setItem("uid", user.uid)
                         sessionStorage.setItem(
@@ -84,6 +85,7 @@ function App() {
                                 " " +
                                 userInfo.data.user.last_name
                         )
+                        setUser(user)
                     } catch (error) {
                         console.error(error)
                     }
@@ -101,18 +103,26 @@ function App() {
     const sendMsg = async (msg, textFlag = true) => {
         const { uid } = auth.currentUser
         try {
-            const dirColRef = collection(firestore, "chat-driectory")
+            const dirColRef = collection(firestore, "chat-directory")
             const dirDocRefSelf = doc(dirColRef, sessionStorage.getItem("uid"))
             const dirDocRefOtherUser = doc(
                 dirColRef,
                 sessionStorage.getItem("other-user-uid")
             )
-            await setDoc(dirDocRefSelf, {
-                chats: [sessionStorage.getItem("other-user-uid")]
-            })
-            await setDoc(dirDocRefOtherUser, {
-                chats: [sessionStorage.getItem("uid")]
-            })
+            await setDoc(
+                dirDocRefSelf,
+                {
+                    chats: arrayUnion(sessionStorage.getItem("other-user-uid"))
+                },
+                { merge: true }
+            )
+            await setDoc(
+                dirDocRefOtherUser,
+                {
+                    chats: arrayUnion(sessionStorage.getItem("uid"))
+                },
+                { merge: true }
+            )
             // adding msg doc
             textFlag
                 ? await addDoc(collection(firestore, selectedChat), {
@@ -151,7 +161,7 @@ function App() {
                     <authContext.Provider value={authTkn.current}>
                         <ChatList
                             selectChat={setSelectedChat}
-                            auth={auth}
+                            user={user}
                             firestore={firestore}
                         />
                         <ChatBox
