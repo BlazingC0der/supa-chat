@@ -9,7 +9,6 @@ import {
     collection,
     doc,
     setDoc,
-    updateDoc,
     arrayUnion
 } from "firebase/firestore"
 import axios from "axios"

@@ -11,7 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-leapstartupearly-82067-5aa4a4a8caaa.json
 .env
 
 # Editor directories and files

@@ -78,7 +78,7 @@ const ChatList = (props) => {
                     orderBy("createdAt", "desc"),
                     limit(1)
                 )
-                const unsubscribe = onSnapshot(
+                onSnapshot(
                     messageQuery,
                     (querySnapshot) => {
                         const latestMsg = querySnapshot.docs.map((doc) => ({
