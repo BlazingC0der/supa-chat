@@ -18,7 +18,13 @@ const ChatMessage = (props) => {
                 ) : (
                     <div style={{ height: "50px", width: "50px" }}></div>
                 )}
-                <p className="msg-text">{props.text}</p>
+                {!props.isFile ? (
+                    <p className="msg-content">{props.text}</p>
+                ) : (
+                    <a className="msg-content" href={props.file} download target="_blank">
+                        {props.filename}
+                    </a>
+                )}
             </div>
         </>
     )

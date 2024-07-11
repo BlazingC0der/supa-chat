@@ -58,14 +58,15 @@ const ChatBox = (props) => {
 
     const sendFileMessage = (e) => {
         const storage = getStorage()
-        const storageRef = ref(storage, e.target.files[0].name)
+        const filename = e.target.files[0].name
+        const storageRef = ref(storage, filename)
         // 'file' comes from the Blob or File API
         uploadBytes(storageRef, e.target.files[0]).then((snapshot) => {
             console.log("Uploaded a blob or file!", snapshot)
             getDownloadURL(storageRef)
                 .then((url) => {
                     console.log("File available at", url)
-                    props.send(url, false)
+                    props.send(url, false, filename)
                     // Do something with the URL, e.g., display it or save it to a database
                 })
                 .catch((error) => {
@@ -81,16 +82,22 @@ const ChatBox = (props) => {
                     i > 0 && messages[i - 1].uid !== msg.uid ? (
                         <ChatMessage
                             key={msg.id}
-                            text={msg.text}
+                            text={msg?.text}
+                            file={msg?.file}
+                            filename={msg?.filename}
                             uid={msg.uid}
                             showProfileImg
+                            isFile={msg.file ? true : false}
                         />
                     ) : (
                         <ChatMessage
                             key={msg.id}
                             text={msg.text}
                             uid={msg.uid}
+                            file={msg?.file}
+                            filename={msg?.filename}
                             showProfileImg={i === 0}
+                            isFile={msg.file ? true : false}
                         />
                     )
                 )}

@@ -99,7 +99,7 @@ function App() {
         }
     }
 
-    const sendMsg = async (msg, textFlag = true) => {
+    const sendMsg = async (msg, textFlag = true, filename = "") => {
         const { uid } = auth.currentUser
         try {
             const dirColRef = collection(firestore, "chat-directory")
@@ -131,6 +131,7 @@ function App() {
                   })
                 : await addDoc(collection(firestore, selectedChat), {
                       file: msg,
+                      filename,
                       createdAt: serverTimestamp(),
                       uid
                   })
