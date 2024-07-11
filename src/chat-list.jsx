@@ -13,6 +13,7 @@ import {
 import axios from "axios"
 import { authContext } from "./App"
 import Searchbar from "./searchbar"
+import { decryptMessage } from "./utils/decrypt"
 
 const ChatList = (props) => {
     const selectedUser = useRef(null)
@@ -158,7 +159,9 @@ const ChatList = (props) => {
                     />
                     <div className="user-chat">
                         <h4 style={{ margin: 0 }}>{user.name}</h4>
-                        <span className="latest-msg">{user.msg}</span>
+                        <span className="latest-msg">
+                            {decryptMessage(user.msg)}
+                        </span>
                     </div>
                 </div>
             ))}

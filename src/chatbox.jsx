@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore"
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import "./chatbox.css"
+import { decryptMessage } from "./utils/decrypt"
 
 const ChatBox = (props) => {
     const [messages, setMessages] = useState([])
@@ -82,9 +83,9 @@ const ChatBox = (props) => {
                     i > 0 && messages[i - 1].uid !== msg.uid ? (
                         <ChatMessage
                             key={msg.id}
-                            text={msg?.text}
                             file={msg?.file}
                             filename={msg?.filename}
+                            text={decryptMessage(msg.text)}
                             uid={msg.uid}
                             showProfileImg
                             isFile={msg.file ? true : false}
@@ -92,7 +93,7 @@ const ChatBox = (props) => {
                     ) : (
                         <ChatMessage
                             key={msg.id}
-                            text={msg.text}
+                            text={decryptMessage(msg.text)}
                             uid={msg.uid}
                             file={msg?.file}
                             filename={msg?.filename}

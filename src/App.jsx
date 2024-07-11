@@ -14,6 +14,7 @@ import {
 import axios from "axios"
 import ChatBox from "./chatbox"
 import ChatList from "./chat-list"
+import CryptoJS from "crypto-js"
 
 const firebaseConfig = {
     apiKey: "AIzaSyA2xWMLsZu35nSeV4VJZQhhYXOoZC-66sw",
@@ -125,8 +126,10 @@ function App() {
             // adding msg doc
             textFlag
                 ? await addDoc(collection(firestore, selectedChat), {
-                      text: msg,
-                      createdAt: serverTimestamp(),
+                      text: CryptoJS.AES.encrypt(
+                          msg,
+                          import.meta.env.VITE_SECRET_KEY
+                      ).toString(),createdAt: serverTimestamp(),
                       uid
                   })
                 : await addDoc(collection(firestore, selectedChat), {
