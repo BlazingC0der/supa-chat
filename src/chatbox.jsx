@@ -84,7 +84,7 @@ const ChatBox = (props) => {
                         <ChatMessage
                             key={msg.id}
                             file={msg?.file}
-                            filename={msg?.filename}
+                            filename={decryptMessage(msg.filename)}
                             text={decryptMessage(msg.text)}
                             uid={msg.uid}
                             showProfileImg
@@ -96,7 +96,7 @@ const ChatBox = (props) => {
                             text={decryptMessage(msg.text)}
                             uid={msg.uid}
                             file={msg?.file}
-                            filename={msg?.filename}
+                            filename={decryptMessage(msg.filename)}
                             showProfileImg={i === 0}
                             isFile={msg.file ? true : false}
                         />
@@ -110,7 +110,9 @@ const ChatBox = (props) => {
                     onClick={() => fileInput.current.click()}
                     type="button"
                 >
-                    <span class="material-symbols-rounded">attach_file</span>
+                    <span className="material-symbols-rounded">
+                        attach_file
+                    </span>
                 </button>
                 <input
                     type="file"

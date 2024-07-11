@@ -129,12 +129,16 @@ function App() {
                       text: CryptoJS.AES.encrypt(
                           msg,
                           import.meta.env.VITE_SECRET_KEY
-                      ).toString(),createdAt: serverTimestamp(),
+                      ).toString(),
+                      createdAt: serverTimestamp(),
                       uid
                   })
                 : await addDoc(collection(firestore, selectedChat), {
                       file: msg,
-                      filename,
+                      filename:CryptoJS.AES.encrypt(
+                          filename,
+                          import.meta.env.VITE_SECRET_KEY
+                      ).toString(),
                       createdAt: serverTimestamp(),
                       uid
                   })
