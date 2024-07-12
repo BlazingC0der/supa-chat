@@ -1,12 +1,34 @@
+import axios from "axios"
 import "./searchbar.css"
+import { useRef } from "react"
 
-const searchUser = (e) => {
-    setTimeout(() => {
-        console.log(e.target.value)
-    }, 1000)
-}
+const Searchbar = (props) => {
+    const timeoutId = useRef(NaN)
+    const searchUser = (e) => {
+        !isNaN(timeoutId.current) && clearInterval(timeoutId.current)
+        timeoutId.current = setTimeout(async () => {
+            try {
+                const res = await axios.get(
+                    `${import.meta.env.VITE_DEV_API_URL}user-profile/${
+                        e.target.value
+                    }`
+                )
+                !res.data
+                    ? props.setSearchedUsers([])
+                    : props.setSearchedUsers([
+                          {
+                              name: res.data.name,
+                              uid: res.data.user,
+                              photoURL: res.data.avatar
+                          }
+                      ])
+            } catch (error) {
+                props.setSearchedUsers([])
+                console.error(error)
+            }
+        }, 3000)
+    }
 
-const Searchbar = () => {
     return (
         <input
             type="text"

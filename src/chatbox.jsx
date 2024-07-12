@@ -16,6 +16,7 @@ const ChatBox = (props) => {
     const [formValue, setFormValue] = useState("")
     const scrollMarker = useRef()
     const fileInput = useRef()
+
     const messagesRef = useMemo(() => {
         return props.selectedChat
             ? collection(props.firestore, props.selectedChat)

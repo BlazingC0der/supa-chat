@@ -19,6 +19,8 @@ const ChatList = (props) => {
     const selectedUser = useRef(null)
     // const [selectedUserIndex, setSelectedUserIndex] = useState(NaN)
     const [users, setUsers] = useState([])
+    const [searchedUsers, setSearchedUsers] = useState([])
+    const latestMsgs=[]
 
     const authTkn = useContext(authContext)
 
@@ -55,22 +57,26 @@ const ChatList = (props) => {
     //     }
     // }, [selectedUserIndex])
 
-    const msgRefs = useMemo(() => {
-        const tempMsgRefs = []
-        users.forEach((user) => {
-            tempMsgRefs.push(
+    const conversations = useMemo(() => {
+        return searchedUsers.length ? searchedUsers : users
+    }, [searchedUsers, users])
+
+    const msgRefs = useMemo(
+        () =>
+        {
+            // console.log("running 2");
+            return conversations.map((user) =>
                 collection(
                     props.firestore,
                     sha1(user.uid + sessionStorage.getItem("uid"))
                 )
-            )
-        })
-        return [...tempMsgRefs]
-    }, [users])
+            )},
+        [conversations]
+    )
 
     useEffect(() => {
         if (msgRefs.length > 0) {
-            users.forEach((_, i) => {
+            conversations.forEach((_, i) => {
                 const messageQuery = query(
                     msgRefs[i],
                     orderBy("createdAt", "desc"),
@@ -81,11 +87,14 @@ const ChatList = (props) => {
                         id: doc.id,
                         ...doc.data()
                     }))
-                    const tempUsers = [...users]
-                    tempUsers[i].msg = latestMsg[0].text
+                    // const tempUsers = [...conversations]
+                    latestMsgs[i] = latestMsg[0].text
                         ? latestMsg[0]?.text
                         : latestMsg[0]?.filename
-                    setUsers([...tempUsers])
+                    // console.log("running")
+                    // searchedUsers.length
+                    //     ? setSearchedUsers([...tempUsers])
+                    //     : setUsers([...tempUsers])
                 })
             })
         }
@@ -136,17 +145,25 @@ const ChatList = (props) => {
             (selectedUser.current.style.backgroundColor = "transparent")
         e.currentTarget.style.backgroundColor = "#f6f6fe"
         selectedUser.current = e.currentTarget
-        props.selectChat(sha1(users[index].uid + sessionStorage.getItem("uid")))
+        props.selectChat(
+            sha1(conversations[index].uid + sessionStorage.getItem("uid"))
+        )
         // setSelectedUserIndex(index)
-        sessionStorage.setItem("other-user-uid", users[index].uid)
-        sessionStorage.setItem("other-user-photoURL", users[index].photoURL)
-        sessionStorage.setItem("other-user-displayName", users[index].name)
+        sessionStorage.setItem("other-user-uid", conversations[index].uid)
+        sessionStorage.setItem(
+            "other-user-photoURL",
+            conversations[index].photoURL
+        )
+        sessionStorage.setItem(
+            "other-user-displayName",
+            conversations[index].name
+        )
     }
 
     return (
         <section className="chat-list">
-            <Searchbar />
-            {users.map((user, i) => (
+            <Searchbar setSearchedUsers={setSearchedUsers} />
+            {conversations.map((user, i) => (
                 <div
                     className="chat-item"
                     key={user.uid}
@@ -160,7 +177,7 @@ const ChatList = (props) => {
                     <div className="user-chat">
                         <h4 style={{ margin: 0 }}>{user.name}</h4>
                         <span className="latest-msg">
-                            {decryptMessage(user.msg)}
+                            {decryptMessage(latestMsgs[i])}
                         </span>
                     </div>
                 </div>
