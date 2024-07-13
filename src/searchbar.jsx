@@ -39,7 +39,7 @@ const Searchbar = (props) => {
                 placeholder="Search messages"
                 onChange={searchUser}
             />
-            <button>New Group</button>
+            <button className="grouping-btn">New Group</button>
         </div>
     )
 }

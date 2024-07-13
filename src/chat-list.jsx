@@ -24,8 +24,6 @@ const ChatList = (props) => {
     const [groupMembers, setGroupMembers] = useState([])
     const [latestMsgs, setLatestMsgs] = useState([])
 
-    const authTkn = useContext(authContext)
-
     // const userData = useMemo(async () => {
     //     if (isNaN(selectedUserIndex)) {
     //         return
@@ -121,20 +119,22 @@ const ChatList = (props) => {
                 const tempUsers = await Promise.all(
                     chatUids.map(async (uid) => {
                         try {
-                            const res = await axios.get(
-                                `${
-                                    import.meta.env.VITE_DEV_API_URL
-                                }profile/${uid}`,
-                                {
-                                    headers: {
-                                        Authorization: `Bearer ${authTkn}`
-                                    }
-                                }
+                            const chatRef = collection(props.firestore, uid)
+                            const participantsSnap = await getDoc(
+                                doc(chatRef, "participants")
                             )
-                            return {
-                                name: res.data.name,
-                                uid,
-                                photoURL: res.data.avatar
+                            if (participantsSnap.exists()) {
+                                const participants =
+                                    participantsSnap.data().userData
+                                const userData = []
+                                participants.forEach((participant) => {
+                                    if (participant.uid !== props.user.uid) {
+                                        userData.push(participant)
+                                    }
+                                })
+                                return userData.length > 1
+                                    ? userData
+                                    : userData[0]
                             }
                         } catch (err) {
                             console.error(err)
@@ -170,7 +170,7 @@ const ChatList = (props) => {
 
     return (
         <section className="chat-list">
-            <Searchbar setSearchedUsers={setSearchedUsers} />
+            <Searchbar setSearchedUsers={setSearchedUsers} groupCreationToggle={setGroupCreationMode} />
             {conversations.map((user, i) => (
                 <div
                     className="chat-item"

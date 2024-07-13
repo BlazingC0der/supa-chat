@@ -9,12 +9,14 @@ import {
     collection,
     doc,
     setDoc,
-    arrayUnion
+    arrayUnion,
+    getDoc
 } from "firebase/firestore"
 import axios from "axios"
 import ChatBox from "./chatbox"
 import ChatList from "./chat-list"
 import CryptoJS from "crypto-js"
+import sha1 from "sha1"
 
 const firebaseConfig = {
     apiKey: "AIzaSyA2xWMLsZu35nSeV4VJZQhhYXOoZC-66sw",
@@ -66,7 +68,9 @@ function App() {
                     const user = userCredential.user
                     try {
                         const userInfo = await axios.get(
-                            `${import.meta.env.VITE_DEV_API_URL}profile/${user.uid}`,
+                            `${import.meta.env.VITE_DEV_API_URL}profile/${
+                                user.uid
+                            }`,
                             {
                                 headers: {
                                     Authorization: `Bearer ${res.data.django_token.access}`
@@ -75,10 +79,7 @@ function App() {
                         )
                         console.log("User signed in:", user)
                         sessionStorage.setItem("uid", user.uid)
-                        sessionStorage.setItem(
-                            "photoURL",
-                            userInfo.data.avatar
-                        )
+                        sessionStorage.setItem("photoURL", userInfo.data.avatar)
                         sessionStorage.setItem(
                             "displayName",
                             userInfo.data.name
@@ -97,33 +98,56 @@ function App() {
             console.error(error)
         }
     }
-
     const sendMsg = async (msg, textFlag = true, filename = "") => {
-        const { uid } = auth.currentUser
+        const [uid, otherUserUid] = [
+            sessionStorage.getItem("uid"),
+            sessionStorage.getItem("other-user-uid")
+        ]
         try {
             const dirColRef = collection(firestore, "chat-directory")
-            const dirDocRefSelf = doc(dirColRef, sessionStorage.getItem("uid"))
-            const dirDocRefOtherUser = doc(
-                dirColRef,
-                sessionStorage.getItem("other-user-uid")
+            const dirDocRefSelf = doc(dirColRef, uid)
+            const dirDocRefOtherUser = doc(dirColRef, otherUserUid)
+            const chatColRef = collection(firestore, selectedChat)
+            const participantsDocRef = doc(chatColRef, "participants")
+            await setDoc(
+                participantsDocRef,
+                {
+                    userData: arrayUnion(
+                        {
+                            uid: uid,
+                            name: sessionStorage.getItem("displayName"),
+                            photoURL: sessionStorage.getItem("photoURL")
+                        },
+                        {
+                            uid: otherUserUid,
+                            name: sessionStorage.getItem(
+                                "other-user-displayName"
+                            ),
+                            photoURL: sessionStorage.getItem(
+                                "other-user-photoURL"
+                            )
+                        }
+                    )
+                },
+                { merge: true }
             )
             await setDoc(
                 dirDocRefSelf,
                 {
-                    chats: arrayUnion(sessionStorage.getItem("other-user-uid"))
+                    chats: arrayUnion(sha1(otherUserUid + uid))
                 },
                 { merge: true }
             )
             await setDoc(
                 dirDocRefOtherUser,
                 {
-                    chats: arrayUnion(sessionStorage.getItem("uid"))
+                    chats: arrayUnion(sha1(uid + otherUserUid))
                 },
                 { merge: true }
             )
             // adding msg doc
             textFlag
-                ? await addDoc(collection(firestore, selectedChat), {
+                ? await addDoc(chatColRef, {
                       text: CryptoJS.AES.encrypt(
                           msg,
                           import.meta.env.VITE_SECRET_KEY
@@ -131,9 +155,9 @@ function App() {
                       createdAt: serverTimestamp(),
                       uid
                   })
-                : await addDoc(collection(firestore, selectedChat), {
+                : await addDoc(chatColRef, {
                       file: msg,
-                      filename:CryptoJS.AES.encrypt(
+                      filename: CryptoJS.AES.encrypt(
                           filename,
                           import.meta.env.VITE_SECRET_KEY
                       ).toString(),
