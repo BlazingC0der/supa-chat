@@ -24,7 +24,6 @@ const ChatBox = (props) => {
     }, [props.selectedChat])
 
     useEffect(() => {
-        console.log("new user", props.auth)
         scrollMarker.current.scrollIntoView({ behavior: "smooth" })
     }, [props.auth])
 

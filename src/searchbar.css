@@ -1,4 +1,4 @@
-.searchbar{
+.searchbar {
     height: 45px;
     width: 90%;
     border-radius: 10px;
@@ -6,4 +6,12 @@
     border: none;
     outline: none;
     padding-left: 25px;
+}
+
+.user-search {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    column-gap: 15px;
 }

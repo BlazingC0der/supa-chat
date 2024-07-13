@@ -30,14 +30,17 @@ const Searchbar = (props) => {
     }
 
     return (
-        <input
-            type="text"
-            name="user-search"
-            id="user-search"
-            className="searchbar"
-            placeholder="Search messages"
-            onChange={searchUser}
-        />
+        <div className="user-search">
+            <input
+                type="text"
+                name="user-search"
+                id="user-search"
+                className="searchbar"
+                placeholder="Search messages"
+                onChange={searchUser}
+            />
+            <button>New Group</button>
+        </div>
     )
 }
 

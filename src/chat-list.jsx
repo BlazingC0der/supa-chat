@@ -20,7 +20,9 @@ const ChatList = (props) => {
     // const [selectedUserIndex, setSelectedUserIndex] = useState(NaN)
     const [users, setUsers] = useState([])
     const [searchedUsers, setSearchedUsers] = useState([])
-    const latestMsgs=[]
+    const [groupCreationMode, setGroupCreationMode] = useState(false)
+    const [groupMembers, setGroupMembers] = useState([])
+    const [latestMsgs, setLatestMsgs] = useState([])
 
     const authTkn = useContext(authContext)
 
@@ -57,46 +59,52 @@ const ChatList = (props) => {
     //     }
     // }, [selectedUserIndex])
 
+    useEffect(() => {
+        console.log("LM", latestMsgs)
+    }, [latestMsgs])
+
     const conversations = useMemo(() => {
         return searchedUsers.length ? searchedUsers : users
     }, [searchedUsers, users])
 
     const msgRefs = useMemo(
         () =>
-        {
-            // console.log("running 2");
-            return conversations.map((user) =>
+            conversations.map((user) =>
                 collection(
                     props.firestore,
                     sha1(user.uid + sessionStorage.getItem("uid"))
                 )
-            )},
+            ),
         [conversations]
     )
 
     useEffect(() => {
         if (msgRefs.length > 0) {
-            conversations.forEach((_, i) => {
+            const unsubscribers = msgRefs.map((ref, i) => {
                 const messageQuery = query(
-                    msgRefs[i],
+                    ref,
                     orderBy("createdAt", "desc"),
                     limit(1)
                 )
-                onSnapshot(messageQuery, (querySnapshot) => {
-                    const latestMsg = querySnapshot.docs.map((doc) => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }))
-                    // const tempUsers = [...conversations]
-                    latestMsgs[i] = latestMsg[0].text
-                        ? latestMsg[0]?.text
-                        : latestMsg[0]?.filename
-                    // console.log("running")
-                    // searchedUsers.length
-                    //     ? setSearchedUsers([...tempUsers])
-                    //     : setUsers([...tempUsers])
+                return onSnapshot(messageQuery, (querySnapshot) => {
+                    setLatestMsgs((prevLatestMsgs) => {
+                        const newLatestMsgs = [...prevLatestMsgs]
+                        const latestMsg = querySnapshot.docs.map((doc) => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }))
+                        newLatestMsgs[i] = latestMsg[0]?.text
+                            ? latestMsg[0]?.text
+                            : latestMsg[0]?.filename
+                        console.log(newLatestMsgs)
+                        return newLatestMsgs
+                    })
                 })
             })
+            // Clean up the onSnapshot listeners on unmount
+            return () => {
+                unsubscribers.forEach((unsubscribe) => unsubscribe())
+            }
         }
     }, [msgRefs])
 

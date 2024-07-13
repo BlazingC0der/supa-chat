@@ -52,7 +52,7 @@ function App() {
         e.preventDefault()
         try {
             const res = await axios.post(
-                `${import.meta.env.VITE_API_URL}token/`,
+                `${import.meta.env.VITE_DEV_API_URL}token/`,
                 {
                     username: username.current,
                     password: password.current
@@ -66,7 +66,7 @@ function App() {
                     const user = userCredential.user
                     try {
                         const userInfo = await axios.get(
-                            `${import.meta.env.VITE_API_URL}user/${user.uid}/`,
+                            `${import.meta.env.VITE_DEV_API_URL}profile/${user.uid}`,
                             {
                                 headers: {
                                     Authorization: `Bearer ${res.data.django_token.access}`
@@ -77,13 +77,11 @@ function App() {
                         sessionStorage.setItem("uid", user.uid)
                         sessionStorage.setItem(
                             "photoURL",
-                            userInfo.data.user.image
+                            userInfo.data.avatar
                         )
                         sessionStorage.setItem(
                             "displayName",
-                            userInfo.data.user.first_name +
-                                " " +
-                                userInfo.data.user.last_name
+                            userInfo.data.name
                         )
                         setUser(user)
                     } catch (error) {
