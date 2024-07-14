@@ -10,8 +10,6 @@ import {
     getDoc,
     doc
 } from "firebase/firestore"
-import axios from "axios"
-import { authContext } from "./App"
 import Searchbar from "./searchbar"
 import { decryptMessage } from "./utils/decrypt"
 
@@ -58,8 +56,13 @@ const ChatList = (props) => {
     // }, [selectedUserIndex])
 
     useEffect(() => {
-        console.log("LM", latestMsgs)
-    }, [latestMsgs])
+        ;(async () => {
+            if (!groupCreationMode) {
+                await props.createGroup([...groupMembers])
+                setGroupMembers([])
+            }
+        })()
+    }, [groupCreationMode])
 
     const conversations = useMemo(() => {
         return searchedUsers.length ? searchedUsers : users
@@ -94,7 +97,6 @@ const ChatList = (props) => {
                         newLatestMsgs[i] = latestMsg[0]?.text
                             ? latestMsg[0]?.text
                             : latestMsg[0]?.filename
-                        console.log(newLatestMsgs)
                         return newLatestMsgs
                     })
                 })
@@ -107,45 +109,50 @@ const ChatList = (props) => {
     }, [msgRefs])
 
     useEffect(() => {
-        ;(async () => {
-            // Reference to the chat-dir collection
-            const colRef = collection(props.firestore, "chat-directory")
-            // Reference to the document containing user's chats
-            const docRef = doc(colRef, props.user.uid)
-            // Fetching the document
-            const docSnap = await getDoc(docRef)
+        const fetchChatParticipants = async (chatUids) => {
+            const tempUsers = await Promise.all(
+                chatUids.map(async (uid) => {
+                    try {
+                        const chatRef = collection(props.firestore, uid)
+                        const participantsSnap = await getDoc(
+                            doc(chatRef, "participants")
+                        )
+                        if (participantsSnap.exists()) {
+                            const participants =
+                                participantsSnap.data().userData
+                            const userData = []
+                            participants.forEach((participant) => {
+                                if (participant.uid !== props.user.uid) {
+                                    userData.push(participant)
+                                }
+                            })
+                            return userData.length > 1 ? userData : userData[0]
+                        }
+                    } catch (err) {
+                        console.error(err)
+                        return null
+                    }
+                })
+            )
+            // Filtering out null responses due to errors
+            setUsers([...tempUsers.filter((user) => user !== null)])
+        }
+
+        // Reference to the chat-dir collection
+        const colRef = collection(props.firestore, "chat-directory")
+        // Reference to the document containing user's chats
+        const docRef = doc(colRef, props.user.uid)
+
+        // Listening for real-time updates
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 const chatUids = docSnap.data().chats
-                const tempUsers = await Promise.all(
-                    chatUids.map(async (uid) => {
-                        try {
-                            const chatRef = collection(props.firestore, uid)
-                            const participantsSnap = await getDoc(
-                                doc(chatRef, "participants")
-                            )
-                            if (participantsSnap.exists()) {
-                                const participants =
-                                    participantsSnap.data().userData
-                                const userData = []
-                                participants.forEach((participant) => {
-                                    if (participant.uid !== props.user.uid) {
-                                        userData.push(participant)
-                                    }
-                                })
-                                return userData.length > 1
-                                    ? userData
-                                    : userData[0]
-                            }
-                        } catch (err) {
-                            console.error(err)
-                            return null
-                        }
-                    })
-                )
-                // Filtering out null responses due to errors
-                setUsers([...tempUsers.filter((user) => user !== null)])
+                fetchChatParticipants(chatUids)
             }
-        })()
+        })
+
+        // Cleanup on unmount
+        return () => unsubscribe()
     }, [props.user])
 
     const showChat = (e, index) => {
@@ -168,14 +175,33 @@ const ChatList = (props) => {
         )
     }
 
+    const addGroupMembers = (e, index) => {
+        e.currentTarget.style.backgroundColor = "#f6f6fe"
+        setGroupMembers((prevGroupMembers) => [
+            ...prevGroupMembers,
+            {
+                uid: conversations[index].uid,
+                name: conversations[index].name,
+                photoURL: conversations[index].photoURL
+            }
+        ])
+    }
+
     return (
         <section className="chat-list">
-            <Searchbar setSearchedUsers={setSearchedUsers} groupCreationToggle={setGroupCreationMode} />
+            <Searchbar
+                setSearchedUsers={setSearchedUsers}
+                groupCreationToggle={setGroupCreationMode}
+            />
             {conversations.map((user, i) => (
                 <div
                     className="chat-item"
                     key={user.uid}
-                    onClick={(e) => showChat(e, i)}
+                    onClick={(e) => {
+                        groupCreationMode
+                            ? addGroupMembers(e, i)
+                            : showChat(e, i)
+                    }}
                 >
                     <img
                         src={user.photoURL}

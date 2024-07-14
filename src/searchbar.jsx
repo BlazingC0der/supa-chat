@@ -39,7 +39,17 @@ const Searchbar = (props) => {
                 placeholder="Search messages"
                 onChange={searchUser}
             />
-            <button className="grouping-btn">New Group</button>
+            <button
+                className="grouping-btn"
+                onClick={() => {
+                    document
+                        .querySelector(".grouping-btn")
+                        .classList.toggle("grouping-btn-clicked")
+                    props.groupCreationToggle((creationMode) => !creationMode)
+                }}
+            >
+                New Group
+            </button>
         </div>
     )
 }

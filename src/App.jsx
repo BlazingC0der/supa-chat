@@ -170,6 +170,31 @@ function App() {
         }
     }
 
+    const createGroup = async (members) => {
+        let memberIds = ""
+        let groupChatUid
+        members.forEach((member) => {
+            memberIds += member.uid
+        })
+        groupChatUid = sha1(memberIds)
+        members = [
+            ...members,
+            {
+                uid: sessionStorage.getItem("uid"),
+                name: sessionStorage.getItem("displayName"),
+                photoURL: sessionStorage.getItem("photoURL")
+            }
+        ]
+        try {
+            const chatColRef = collection(firestore, groupChatUid)
+            await setDoc(doc(chatColRef, "participants"), {
+                userData: [...members]
+            })
+        } catch (error) {
+            console.error("Error creating group: ", error)
+        }
+    }
+
     return (
         <div className="App">
             {user && (
@@ -192,6 +217,7 @@ function App() {
                             selectChat={setSelectedChat}
                             user={user}
                             firestore={firestore}
+                            createGroup={createGroup}
                         />
                         <ChatBox
                             auth={auth}
