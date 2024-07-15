@@ -19,7 +19,7 @@ const ChatBox = (props) => {
 
     const messagesRef = useMemo(() => {
         return props.selectedChat
-            ? collection(props.firestore, props.selectedChat)
+            ? collection(props.firestore, props.selectedChat.uid)
             : null
     }, [props.selectedChat])
 
@@ -89,6 +89,7 @@ const ChatBox = (props) => {
                             uid={msg.uid}
                             showProfileImg
                             isFile={msg.file ? true : false}
+                            groupChat={props.selectedChat.type === "group"}
                         />
                     ) : (
                         <ChatMessage
@@ -99,6 +100,7 @@ const ChatBox = (props) => {
                             filename={decryptMessage(msg.filename)}
                             showProfileImg={i === 0}
                             isFile={msg.file ? true : false}
+                            groupChat={props.selectedChat.type === "group"}
                         />
                     )
                 )}

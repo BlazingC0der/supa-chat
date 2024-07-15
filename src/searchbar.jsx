@@ -19,14 +19,15 @@ const Searchbar = (props) => {
                           {
                               name: res.data.name,
                               uid: res.data.user,
-                              photoURL: res.data.avatar
+                              photoURL: res.data.avatar,
+                              type: "user"
                           }
                       ])
             } catch (error) {
                 props.setSearchedUsers([])
                 console.error(error)
             }
-        }, 3000)
+        }, 1000)
     }
 
     return (

@@ -12,61 +12,29 @@ import {
 } from "firebase/firestore"
 import Searchbar from "./searchbar"
 import { decryptMessage } from "./utils/decrypt"
+import groupProfileImg from "./assets/group.png"
 
 const ChatList = (props) => {
-    const selectedUser = useRef(null)
-    // const [selectedUserIndex, setSelectedUserIndex] = useState(NaN)
-    const [users, setUsers] = useState([])
+    const selectedChat = useRef(null)
+    const [chats, setChats] = useState([])
     const [searchedUsers, setSearchedUsers] = useState([])
     const [groupCreationMode, setGroupCreationMode] = useState(false)
     const [groupMembers, setGroupMembers] = useState([])
     const [latestMsgs, setLatestMsgs] = useState([])
 
-    // const userData = useMemo(async () => {
-    //     if (isNaN(selectedUserIndex)) {
-    //         return
-    //     }
-    //     // Reference to the collection
-    //     const colRef = collection(
-    //         props.firestore,
-    //         sha1(users[selectedUserIndex].uid + sessionStorage.getItem("uid"))
-    //     )
-    //     // Reference to the document
-    //     const docRef = doc(colRef, "participants")
-    //     // Fetching the document
-    //     const docSnap = await getDoc(docRef)
-    //     if (docSnap.exists()) {
-    //         console.log("Document data:", docSnap.data())
-    //         return docSnap.data()
-    //     } else {
-    //         const participantsData = {
-    //             [sessionStorage.getItem("uid")]: [
-    //                 sessionStorage.getItem("displayName"),
-    //                 sessionStorage.getItem("photoURL")
-    //             ],
-    //             [users[selectedUserIndex].uid]: [
-    //                 users[selectedUserIndex].name,
-    //                 users[selectedUserIndex].photoURL
-    //             ]
-    //         }
-    //         await setDoc(doc(colRef, "participants"), participantsData)
-    //         console.log("No such document!")
-    //         return participantsData
-    //     }
-    // }, [selectedUserIndex])
-
     useEffect(() => {
         ;(async () => {
             if (!groupCreationMode) {
-                await props.createGroup([...groupMembers])
+                groupMembers.length &&
+                    (await props.createGroup([...groupMembers]))
                 setGroupMembers([])
             }
         })()
     }, [groupCreationMode])
 
     const conversations = useMemo(() => {
-        return searchedUsers.length ? searchedUsers : users
-    }, [searchedUsers, users])
+        return searchedUsers.length ? searchedUsers : chats
+    }, [searchedUsers, chats])
 
     const msgRefs = useMemo(
         () =>
@@ -94,6 +62,7 @@ const ChatList = (props) => {
                             id: doc.id,
                             ...doc.data()
                         }))
+                        console.log("latestMsg", latestMsg);
                         newLatestMsgs[i] = latestMsg[0]?.text
                             ? latestMsg[0]?.text
                             : latestMsg[0]?.filename
@@ -120,13 +89,37 @@ const ChatList = (props) => {
                         if (participantsSnap.exists()) {
                             const participants =
                                 participantsSnap.data().userData
-                            const userData = []
-                            participants.forEach((participant) => {
-                                if (participant.uid !== props.user.uid) {
-                                    userData.push(participant)
+                            let userData
+                            if (participants.length > 2) {
+                                const uids = participants.map(
+                                    (participant) => participant.uid
+                                )
+                                const displayNames = participants.map(
+                                    (participant) => participant.name
+                                )
+                                const photoURLs = participants.map(
+                                    (participant) => participant.photoURL
+                                )
+                                userData = {
+                                    type: "group",
+                                    uid,
+                                    photoURL: groupProfileImg,
+                                    name: uid,
+                                    uids,
+                                    displayNames,
+                                    photoURLs
                                 }
-                            })
-                            return userData.length > 1 ? userData : userData[0]
+                            } else {
+                                participants.forEach((participant) => {
+                                    if (participant.uid !== props.user.uid) {
+                                        userData = {
+                                            ...participant,
+                                            type: "user"
+                                        }
+                                    }
+                                })
+                            }
+                            return userData
                         }
                     } catch (err) {
                         console.error(err)
@@ -135,7 +128,7 @@ const ChatList = (props) => {
                 })
             )
             // Filtering out null responses due to errors
-            setUsers([...tempUsers.filter((user) => user !== null)])
+            setChats([...tempUsers.filter((user) => user !== null)])
         }
 
         // Reference to the chat-dir collection
@@ -155,24 +148,38 @@ const ChatList = (props) => {
         return () => unsubscribe()
     }, [props.user])
 
-    const showChat = (e, index) => {
-        selectedUser.current &&
-            (selectedUser.current.style.backgroundColor = "transparent")
+    const showChat = (e, conversation) => {
+        selectedChat.current &&
+            (selectedChat.current.style.backgroundColor = "transparent")
         e.currentTarget.style.backgroundColor = "#f6f6fe"
-        selectedUser.current = e.currentTarget
-        props.selectChat(
-            sha1(conversations[index].uid + sessionStorage.getItem("uid"))
-        )
-        // setSelectedUserIndex(index)
-        sessionStorage.setItem("other-user-uid", conversations[index].uid)
-        sessionStorage.setItem(
-            "other-user-photoURL",
-            conversations[index].photoURL
-        )
-        sessionStorage.setItem(
-            "other-user-displayName",
-            conversations[index].name
-        )
+        selectedChat.current = e.currentTarget
+        if (conversation.type === "user") {
+            props.selectChat({
+                type: "user",
+                uid: sha1(conversation.uid + sessionStorage.getItem("uid"))
+            })
+            sessionStorage.setItem("other-user-uid", conversation.uid)
+            sessionStorage.setItem("other-user-photoURL", conversation.photoURL)
+            sessionStorage.setItem("other-user-displayName", conversation.name)
+        } else {
+            props.selectChat({
+                type: "group",
+                uid: conversation.uid
+            })
+
+            sessionStorage.setItem(
+                "other-user-uids",
+                JSON.stringify(conversation.uids)
+            )
+            sessionStorage.setItem(
+                "other-user-photoURLs",
+                JSON.stringify(conversation.photoURLs)
+            )
+            sessionStorage.setItem(
+                "other-user-displayNames",
+                JSON.stringify(conversation.displayNames)
+            )
+        }
     }
 
     const addGroupMembers = (e, index) => {
@@ -193,23 +200,23 @@ const ChatList = (props) => {
                 setSearchedUsers={setSearchedUsers}
                 groupCreationToggle={setGroupCreationMode}
             />
-            {conversations.map((user, i) => (
+            {conversations.map((chat, i) => (
                 <div
                     className="chat-item"
-                    key={user.uid}
+                    key={chat.uid}
                     onClick={(e) => {
                         groupCreationMode
                             ? addGroupMembers(e, i)
-                            : showChat(e, i)
+                            : showChat(e, chat)
                     }}
                 >
                     <img
-                        src={user.photoURL}
+                        src={chat.photoURL}
                         alt="user avatar"
                         className="profile-pic"
                     />
                     <div className="user-chat">
-                        <h4 style={{ margin: 0 }}>{user.name}</h4>
+                        <h4 style={{ margin: 0 }}>{chat.name}</h4>
                         <span className="latest-msg">
                             {decryptMessage(latestMsgs[i])}
                         </span>

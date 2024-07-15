@@ -3,6 +3,22 @@ import "./msg.css"
 const ChatMessage = (props) => {
     const messageClass =
         props.uid === sessionStorage.getItem("uid") ? "sent" : "received"
+    let otherUserProfileImg
+    let groupMembersUids
+    let groupMembersNames
+    let groupMembersProfileImgs
+    if (props.groupChat) {
+        groupMembersProfileImgs = JSON.parse(
+            sessionStorage.getItem("other-user-photoURLs")
+        )
+        groupMembersNames = JSON.parse(
+            sessionStorage.getItem("other-user-displayNames")
+        )
+        groupMembersUids = JSON.parse(sessionStorage.getItem("other-user-uids"))
+        otherUserProfileImg = props.groupChat
+            ? groupMembersProfileImgs[groupMembersUids.indexOf(props.uid)]
+            : sessionStorage.getItem("other-user-photoURL")
+    }
 
     return (
         <>
@@ -12,7 +28,7 @@ const ChatMessage = (props) => {
                         src={
                             messageClass === "sent"
                                 ? sessionStorage.getItem("photoURL")
-                                : sessionStorage.getItem("other-user-photoURL")
+                                : otherUserProfileImg
                         }
                     />
                 ) : (
@@ -21,7 +37,12 @@ const ChatMessage = (props) => {
                 {!props.isFile ? (
                     <p className="msg-content">{props.text}</p>
                 ) : (
-                    <a className="msg-content" href={props.file} download target="_blank">
+                    <a
+                        className="msg-content"
+                        href={props.file}
+                        download
+                        target="_blank"
+                    >
                         {props.filename}
                     </a>
                 )}

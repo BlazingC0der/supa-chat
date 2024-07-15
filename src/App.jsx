@@ -9,8 +9,7 @@ import {
     collection,
     doc,
     setDoc,
-    arrayUnion,
-    getDoc
+    arrayUnion
 } from "firebase/firestore"
 import axios from "axios"
 import ChatBox from "./chatbox"
@@ -98,7 +97,12 @@ function App() {
             console.error(error)
         }
     }
-    const sendMsg = async (msg, textFlag = true, filename = "") => {
+    const sendMsg = async (
+        msg,
+        textFlag = true,
+        filename = "",
+        groupMsg = false
+    ) => {
         const [uid, otherUserUid] = [
             sessionStorage.getItem("uid"),
             sessionStorage.getItem("other-user-uid")
@@ -107,44 +111,46 @@ function App() {
             const dirColRef = collection(firestore, "chat-directory")
             const dirDocRefSelf = doc(dirColRef, uid)
             const dirDocRefOtherUser = doc(dirColRef, otherUserUid)
-            const chatColRef = collection(firestore, selectedChat)
+            const chatColRef = collection(firestore, selectedChat.uid)
             const participantsDocRef = doc(chatColRef, "participants")
-            await setDoc(
-                participantsDocRef,
-                {
-                    userData: arrayUnion(
-                        {
-                            uid: uid,
-                            name: sessionStorage.getItem("displayName"),
-                            photoURL: sessionStorage.getItem("photoURL")
-                        },
-                        {
-                            uid: otherUserUid,
-                            name: sessionStorage.getItem(
-                                "other-user-displayName"
-                            ),
-                            photoURL: sessionStorage.getItem(
-                                "other-user-photoURL"
-                            )
-                        }
-                    )
-                },
-                { merge: true }
-            )
-            await setDoc(
-                dirDocRefSelf,
-                {
-                    chats: arrayUnion(sha1(otherUserUid + uid))
-                },
-                { merge: true }
-            )
-            await setDoc(
-                dirDocRefOtherUser,
-                {
-                    chats: arrayUnion(sha1(uid + otherUserUid))
-                },
-                { merge: true }
-            )
+            if (!groupMsg) {
+                await setDoc(
+                    participantsDocRef,
+                    {
+                        userData: arrayUnion(
+                            {
+                                uid: uid,
+                                name: sessionStorage.getItem("displayName"),
+                                photoURL: sessionStorage.getItem("photoURL")
+                            },
+                            {
+                                uid: otherUserUid,
+                                name: sessionStorage.getItem(
+                                    "other-user-displayName"
+                                ),
+                                photoURL: sessionStorage.getItem(
+                                    "other-user-photoURL"
+                                )
+                            }
+                        )
+                    },
+                    { merge: true }
+                )
+                await setDoc(
+                    dirDocRefSelf,
+                    {
+                        chats: arrayUnion(sha1(otherUserUid + uid))
+                    },
+                    { merge: true }
+                )
+                await setDoc(
+                    dirDocRefOtherUser,
+                    {
+                        chats: arrayUnion(sha1(uid + otherUserUid))
+                    },
+                    { merge: true }
+                )
+            }
             // adding msg doc
             textFlag
                 ? await addDoc(chatColRef, {
@@ -171,6 +177,14 @@ function App() {
     }
 
     const createGroup = async (members) => {
+        const dirColRef = collection(firestore, "chat-directory")
+        const dirDocRefsGroupMembers = members.map((member) =>
+            doc(dirColRef, member.uid)
+        )
+        console.log("members", members)
+        dirDocRefsGroupMembers.push(
+            doc(dirColRef, sessionStorage.getItem("uid"))
+        )
         let memberIds = ""
         let groupChatUid
         members.forEach((member) => {
@@ -189,6 +203,15 @@ function App() {
             const chatColRef = collection(firestore, groupChatUid)
             await setDoc(doc(chatColRef, "participants"), {
                 userData: [...members]
+            })
+            dirDocRefsGroupMembers.forEach(async (dirDocRef) => {
+                await setDoc(
+                    dirDocRef,
+                    {
+                        chats: arrayUnion(groupChatUid)
+                    },
+                    { merge: true }
+                )
             })
         } catch (error) {
             console.error("Error creating group: ", error)
