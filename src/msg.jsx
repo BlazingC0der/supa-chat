@@ -1,5 +1,5 @@
 import "./msg.css"
-import docx from "./assets/docx.jpg"
+import doc from "./assets/doc.jpg"
 
 const ChatMessage = (props) => {
     const messageClass =
@@ -47,7 +47,7 @@ const ChatMessage = (props) => {
                     >
                         <div className="file-msg">
                             <img
-                                src={docx}
+                                src={doc}
                                 alt="file icon"
                                 className="file-icon"
                             />
@@ -61,10 +61,22 @@ const ChatMessage = (props) => {
                             </div>
                         </div>
                     </a>
+                ) : props.fileType.includes("video") ? (
+                    <video
+                        src={props.file}
+                        className="msg-visual"
+                        style={{
+                            border:
+                                messageClass === "sent"
+                                    ? "3px solid #000080"
+                                    : "3px solid #f1f1f1"
+                        }}
+                        controls
+                    ></video>
                 ) : (
                     <img
                         src={props.file}
-                        className="msg-img"
+                        className="msg-visual"
                         style={{
                             border:
                                 messageClass === "sent"

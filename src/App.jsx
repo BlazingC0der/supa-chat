@@ -19,7 +19,7 @@ import sha1 from "sha1"
 import GroupModal from "./group-creation-modal"
 
 const firebaseConfig = {
-    apiKey: "AIzaSyA2xWMLsZu35nSeV4VJZQhhYXOoZC-66sw",
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: "chat-app-ca35e.firebaseapp.com",
     projectId: "chat-app-ca35e",
     storageBucket: "chat-app-ca35e.appspot.com",

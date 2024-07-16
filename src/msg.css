@@ -31,7 +31,7 @@
     order: -1;
 }
 
-.sent > .msg-img{
+.sent > .msg-visual{
     order: -1;
 }
 
@@ -75,7 +75,7 @@
     background-color: transparent !important;
 }
 
-.msg-img {
+.msg-visual {
     height: 200px;
     width: 350px;
     object-fit: contain;
