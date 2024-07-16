@@ -57,9 +57,19 @@ const ChatBox = (props) => {
         }
     }
 
+    const formatFileSize = (bytes) => {
+        const sizes = ["Bytes", "KB", "MB", "GB", "TB"]
+        if (bytes === 0) return "0 Byte"
+        const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
+        return Math.round(bytes / Math.pow(1024, i), 2) + " " + sizes[i]
+    }
+
     const sendFileMessage = (e) => {
         const storage = getStorage()
         const filename = e.target.files[0].name
+        console.log("file", e.target.files[0])
+        const size = formatFileSize(e.target.files[0].size)
+        const type = e.target.files[0].type
         const storageRef = ref(storage, filename)
         // 'file' comes from the Blob or File API
         uploadBytes(storageRef, e.target.files[0]).then((snapshot) => {
@@ -71,7 +81,9 @@ const ChatBox = (props) => {
                         url,
                         props.selectedChat.type === "group",
                         false,
-                        filename
+                        filename,
+                        size,
+                        type
                     )
                     // Do something with the URL, e.g., display it or save it to a database
                 })
@@ -90,6 +102,8 @@ const ChatBox = (props) => {
                             key={msg.id}
                             file={msg?.file}
                             filename={decryptMessage(msg.filename)}
+                            fileSize={msg.size}
+                            fileType={msg.type}
                             text={decryptMessage(msg.text)}
                             uid={msg.uid}
                             showProfileImg
@@ -106,6 +120,8 @@ const ChatBox = (props) => {
                             showProfileImg={i === 0}
                             isFile={msg.file ? true : false}
                             groupChat={props.selectedChat.type === "group"}
+                            fileSize={msg.size}
+                            fileType={msg.type}
                         />
                     )
                 )}

@@ -104,6 +104,8 @@ function App() {
         groupMsg,
         textFlag = true,
         filename = "",
+        fileSize,
+        fileType
     ) => {
         const [uid, otherUserUid] = [
             sessionStorage.getItem("uid"),
@@ -170,7 +172,9 @@ function App() {
                           import.meta.env.VITE_SECRET_KEY
                       ).toString(),
                       createdAt: serverTimestamp(),
-                      uid
+                      uid,
+                      size: fileSize,
+                      type: fileType
                   })
             console.log("Document successfully written!")
         } catch (error) {
