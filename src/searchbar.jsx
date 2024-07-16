@@ -37,20 +37,10 @@ const Searchbar = (props) => {
                 name="user-search"
                 id="user-search"
                 className="searchbar"
-                placeholder="Search messages"
+                placeholder="Search users"
                 onChange={searchUser}
+                style={{ width: props.width ? props.width : "90%" }}
             />
-            <button
-                className="grouping-btn"
-                onClick={() => {
-                    document
-                        .querySelector(".grouping-btn")
-                        .classList.toggle("grouping-btn-clicked")
-                    props.groupCreationToggle((creationMode) => !creationMode)
-                }}
-            >
-                New Group
-            </button>
         </div>
     )
 }

@@ -1,6 +1,5 @@
 .searchbar {
     height: 45px;
-    width: 90%;
     border-radius: 10px;
     background-color: #f1f1f1;
     border: none;
@@ -14,17 +13,4 @@
     align-items: center;
     justify-content: center;
     column-gap: 15px;
-}
-
-.grouping-btn {
-    background-color: white;
-    border: 1.5px solid #000080;
-    border-radius: 5px;
-    color: #000080;
-    cursor: pointer;
-}
-
-.grouping-btn-clicked{
-    background-color: #000080;
-    color: white;
 }

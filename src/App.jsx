@@ -16,6 +16,7 @@ import ChatBox from "./chatbox"
 import ChatList from "./chat-list"
 import CryptoJS from "crypto-js"
 import sha1 from "sha1"
+import GroupModal from "./group-creation-modal"
 
 const firebaseConfig = {
     apiKey: "AIzaSyA2xWMLsZu35nSeV4VJZQhhYXOoZC-66sw",
@@ -37,6 +38,7 @@ const firestore = getFirestore()
 function App() {
     const [user, setUser] = useState(null)
     const [selectedChat, setSelectedChat] = useState(null)
+    const [openGroupModal, setOpenGroupModal] = useState(false)
     const username = useRef("")
     const password = useRef("")
     const authTkn = useRef("")
@@ -99,9 +101,9 @@ function App() {
     }
     const sendMsg = async (
         msg,
+        groupMsg,
         textFlag = true,
         filename = "",
-        groupMsg = false
     ) => {
         const [uid, otherUserUid] = [
             sessionStorage.getItem("uid"),
@@ -110,10 +112,10 @@ function App() {
         try {
             const dirColRef = collection(firestore, "chat-directory")
             const dirDocRefSelf = doc(dirColRef, uid)
-            const dirDocRefOtherUser = doc(dirColRef, otherUserUid)
             const chatColRef = collection(firestore, selectedChat.uid)
             const participantsDocRef = doc(chatColRef, "participants")
             if (!groupMsg) {
+                const dirDocRefOtherUser = doc(dirColRef, otherUserUid)
                 await setDoc(
                     participantsDocRef,
                     {
@@ -146,7 +148,7 @@ function App() {
                 await setDoc(
                     dirDocRefOtherUser,
                     {
-                        chats: arrayUnion(sha1(uid + otherUserUid))
+                        chats: arrayUnion(sha1(otherUserUid + uid))
                     },
                     { merge: true }
                 )
@@ -176,12 +178,12 @@ function App() {
         }
     }
 
-    const createGroup = async (members) => {
+    const createGroup = async (members, groupName) => {
         const dirColRef = collection(firestore, "chat-directory")
-        const dirDocRefsGroupMembers = members.map((member) =>
-            doc(dirColRef, member.uid)
-        )
         console.log("members", members)
+        const dirDocRefsGroupMembers = members.map((member) =>
+            doc(dirColRef, member.uid.toString())
+        )
         dirDocRefsGroupMembers.push(
             doc(dirColRef, sessionStorage.getItem("uid"))
         )
@@ -204,6 +206,9 @@ function App() {
             await setDoc(doc(chatColRef, "participants"), {
                 userData: [...members]
             })
+            await setDoc(doc(chatColRef, "groupData"), {
+                name: groupName
+            })
             dirDocRefsGroupMembers.forEach(async (dirDocRef) => {
                 await setDoc(
                     dirDocRef,
@@ -220,8 +225,20 @@ function App() {
 
     return (
         <div className="App">
+            <GroupModal
+                openModal={setOpenGroupModal}
+                open={openGroupModal}
+                firestore={firestore}
+                createGroup={createGroup}
+            />
             {user && (
                 <header>
+                    <button
+                        className="grouping-btn"
+                        onClick={() => setOpenGroupModal(true)}
+                    >
+                        New Group
+                    </button>
                     <button
                         className="sign-out"
                         onClick={() => {

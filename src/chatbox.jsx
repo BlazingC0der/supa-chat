@@ -49,7 +49,7 @@ const ChatBox = (props) => {
     const sendMessage = async (e) => {
         e.preventDefault()
         try {
-            await props.send(formValue)
+            await props.send(formValue, props.selectedChat.type === "group")
             setFormValue("")
             scrollMarker.current.scrollIntoView({ behavior: "smooth" })
         } catch (error) {
@@ -67,7 +67,12 @@ const ChatBox = (props) => {
             getDownloadURL(storageRef)
                 .then((url) => {
                     console.log("File available at", url)
-                    props.send(url, false, filename)
+                    props.send(
+                        url,
+                        props.selectedChat.type === "group",
+                        false,
+                        filename
+                    )
                     // Do something with the URL, e.g., display it or save it to a database
                 })
                 .catch((error) => {

@@ -1,4 +1,4 @@
-.chat-list{
+.chat-list {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -10,7 +10,7 @@
     row-gap: 20px;
 }
 
-.chat-item{
+.chat-item {
     height: 15%;
     width: 95%;
     display: flex;
@@ -21,7 +21,7 @@
     padding-left: 5px;
 }
 
-.profile-pic{
+.profile-pic {
     height: 50px;
     width: 50px;
     border-radius: 6px;
@@ -30,7 +30,7 @@
 }
 
 .user-chat {
-    height: 100%;
+    min-height: 80%;
     display: flex;
     flex-direction: column;
     width: 65%;
@@ -41,4 +41,33 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.user-info {
+    display: flex;
+}
+.custom-checkbox {
+    border: 1.5px solid #2563eb;
+    height: 18px;
+    width: 18px;
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+}
+
+.custom-checkbox-clicked {
+    background-color: #2563eb;
+}
+
+.custom-checkbox-clicked:after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 3px;
+    height: 7.5px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    display: block;
 }

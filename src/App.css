@@ -23,8 +23,8 @@ header {
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    padding-right: 10px;
+    justify-content: space-between;
+    padding: 0 10px;
     border-bottom: 0.5px solid rgba(198, 198, 198, 0.726);
 }
 
@@ -47,4 +47,15 @@ header {
 .chats{
     display: flex;
     height: 90vh;
+}
+
+.grouping-btn {
+    background-color: #000080;
+    border-radius: 7px;
+    color: white;
+    cursor: pointer;
+    height: 7vh;
+    width: 10vw;
+    border: none;
+    font-size: 20px;
 }
