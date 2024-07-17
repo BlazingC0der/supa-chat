@@ -96,35 +96,36 @@ const ChatBox = (props) => {
     return (
         <main className="chat-box">
             <div className="msgs">
-                {messages.map((msg, i) =>
-                    i > 0 && messages[i - 1].uid !== msg.uid ? (
-                        <ChatMessage
-                            key={msg.id}
-                            file={msg?.file}
-                            filename={decryptMessage(msg.filename)}
-                            fileSize={msg.size}
-                            fileType={msg.type}
-                            text={decryptMessage(msg.text)}
-                            uid={msg.uid}
-                            showProfileImg
-                            isFile={msg.file ? true : false}
-                            groupChat={props.selectedChat.type === "group"}
-                        />
-                    ) : (
-                        <ChatMessage
-                            key={msg.id}
-                            text={decryptMessage(msg.text)}
-                            uid={msg.uid}
-                            file={msg?.file}
-                            filename={decryptMessage(msg.filename)}
-                            showProfileImg={i === 0}
-                            isFile={msg.file ? true : false}
-                            groupChat={props.selectedChat.type === "group"}
-                            fileSize={msg.size}
-                            fileType={msg.type}
-                        />
-                    )
-                )}
+                {props.selectedChat &&
+                    messages.map((msg, i) =>
+                        i > 0 && messages[i - 1].uid !== msg.uid ? (
+                            <ChatMessage
+                                key={msg.id}
+                                file={msg?.file}
+                                filename={decryptMessage(msg.filename)}
+                                fileSize={msg.size}
+                                fileType={msg.type}
+                                text={decryptMessage(msg.text)}
+                                uid={msg.uid}
+                                showProfileImg
+                                isFile={msg.file ? true : false}
+                                groupChat={props.selectedChat.type === "group"}
+                            />
+                        ) : (
+                            <ChatMessage
+                                key={msg.id}
+                                text={decryptMessage(msg.text)}
+                                uid={msg.uid}
+                                file={msg?.file}
+                                filename={decryptMessage(msg.filename)}
+                                showProfileImg={i === 0}
+                                isFile={msg.file ? true : false}
+                                groupChat={props.selectedChat.type === "group"}
+                                fileSize={msg.size}
+                                fileType={msg.type}
+                            />
+                        )
+                    )}
                 <span ref={scrollMarker}></span>
             </div>
             <form onSubmit={sendMessage} className="msg-form">

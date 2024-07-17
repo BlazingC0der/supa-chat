@@ -72,7 +72,7 @@ const ChatMessage = (props) => {
                                     : "3px solid #f1f1f1"
                         }}
                         controls
-                    ></video>
+                    />
                 ) : (
                     <img
                         src={props.file}

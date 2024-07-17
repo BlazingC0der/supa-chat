@@ -49,7 +49,12 @@ function App() {
         })
         console.log("auth", auth)
         return unsubscribe
-    }, [auth])
+    }, [])
+
+    useEffect(() => {
+      console.log("sc",selectedChat);
+    }, [selectedChat])
+
 
     const signIn = async (e) => {
         e.preventDefault()
@@ -99,6 +104,7 @@ function App() {
             console.error(error)
         }
     }
+
     const sendMsg = async (
         msg,
         groupMsg,
@@ -247,6 +253,7 @@ function App() {
                         className="sign-out"
                         onClick={() => {
                             sessionStorage.clear()
+                            setSelectedChat(null)
                             signOut(auth)
                         }}
                     >
