@@ -18,7 +18,7 @@ const ModalContent = styled(Box)({
     width: "50%",
     height: "90%",
     overflowY: "auto",
-    boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)"
 })
 
 const ModalHeading = styled(Typography)({
@@ -87,7 +87,7 @@ const GroupModal = (props) => {
                             }
                         />
                         <Searchbar
-                            setSearchedUsers={setSearchedUsers}
+                            setSearchedChats={setSearchedUsers}
                             width={"100%"}
                         />
                     </Box>

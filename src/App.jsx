@@ -51,11 +51,6 @@ function App() {
         return unsubscribe
     }, [])
 
-    useEffect(() => {
-      console.log("sc",selectedChat);
-    }, [selectedChat])
-
-
     const signIn = async (e) => {
         e.preventDefault()
         try {
@@ -117,6 +112,7 @@ function App() {
             sessionStorage.getItem("uid"),
             sessionStorage.getItem("other-user-uid")
         ]
+        const uids = [uid,otherUserUid].sort()
         try {
             const dirColRef = collection(firestore, "chat-directory")
             const dirDocRefSelf = doc(dirColRef, uid)
@@ -149,14 +145,14 @@ function App() {
                 await setDoc(
                     dirDocRefSelf,
                     {
-                        chats: arrayUnion(sha1(otherUserUid + uid))
+                        chats: arrayUnion(sha1(uids[0] + uids[1]))
                     },
                     { merge: true }
                 )
                 await setDoc(
                     dirDocRefOtherUser,
                     {
-                        chats: arrayUnion(sha1(otherUserUid + uid))
+                        chats: arrayUnion(sha1(uids[0] + uids[1]))
                     },
                     { merge: true }
                 )
@@ -281,9 +277,9 @@ function App() {
                     <>
                         <form onSubmit={signIn} className="login-form">
                             <input
-                                type="email"
-                                name="email"
-                                id="email"
+                                type="text"
+                                name="uname"
+                                id="uname"
                                 onChange={(e) =>
                                     (username.current = e.target.value)
                                 }

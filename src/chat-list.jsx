@@ -13,28 +13,34 @@ import {
 import Searchbar from "./searchbar"
 import { decryptMessage } from "./utils/decrypt"
 import groupProfileImg from "./assets/group.png"
+import { Snackbar, SnackbarContent } from "@mui/material"
 
 const ChatList = (props) => {
     const selectedChat = useRef(null)
     const [chats, setChats] = useState([])
-    const [searchedUsers, setSearchedUsers] = useState([])
     const [latestMsgs, setLatestMsgs] = useState([])
-
-    const conversations = useMemo(() => {
-        return searchedUsers.length ? searchedUsers : chats
-    }, [searchedUsers, chats])
+    const [showNotification, setShowNotification] = useState(false)
+    const [notificationContent, setNotificationContent] = useState({})
+    const [searchMode, setSearchMode] = useState(false)
 
     const msgRefs = useMemo(
         () =>
             props.users
                 ? null
-                : conversations.map((user) =>
-                      collection(
+                : chats.map((user) => {
+                      const [uid, otherUserUid] = [
+                          sessionStorage.getItem("uid"),
+                          user.uid
+                      ]
+                      const uids = [uid, otherUserUid].sort()
+                      return collection(
                           props.firestore,
-                          sha1(user.uid + sessionStorage.getItem("uid"))
+                          user.type === "group"
+                              ? user.uid
+                              : sha1(uids[0] + uids[1])
                       )
-                  ),
-        [conversations]
+                  }),
+        [chats.length]
     )
 
     useEffect(() => {
@@ -53,12 +59,41 @@ const ChatList = (props) => {
                                 id: doc.id,
                                 ...doc.data()
                             }))
-                            console.log("latestMsg", latestMsg)
                             newLatestMsgs[i] = latestMsg[0]?.text
                                 ? latestMsg[0]?.text
                                 : latestMsg[0]?.filename
+                            console.log("LM",latestMsg[0]);
+                            if (
+                                !searchMode && latestMsg[0]&&
+                                latestMsg[0]?.uid !==
+                                    sessionStorage.getItem("uid")
+                            ) {
+                                setNotificationContent({
+                                    msg: newLatestMsgs[i],
+                                    name: chats[i].name,
+                                    avatar: chats[i].photoURL
+                                })
+                                setShowNotification(true)
+                            }
                             return newLatestMsgs
                         })
+                        // setChats((prevChats) => {
+                        //     const tempMsgRefs = [...msgRefs]
+                        //     let changedIndex
+                        //     const updatedChats = prevChats.filter(
+                        //         (chat, i) => {
+                        //             if (chat.uid !== chats[i].uid) {
+                        //                 tempMsgRefs = tempMsgRefs.splice(i, 1)
+                        //                 changedIndex = i
+                        //                 return true
+                        //             }
+                        //         }
+                        //     )
+                        //     updatedChats.unshift({
+                        //         ...chats[i]
+                        //     })
+                        //     return [...updatedChats]
+                        // })
                     })
                 })
                 // Clean up the onSnapshot listeners on unmount
@@ -128,13 +163,12 @@ const ChatList = (props) => {
                 )
                 // Filtering out null responses due to errors
                 setChats([...tempUsers.filter((user) => user !== null)])
+                sessionStorage.setItem("chats", JSON.stringify(tempUsers))
             }
-
             // Reference to the chat-dir collection
             const colRef = collection(props.firestore, "chat-directory")
             // Reference to the document containing user's chats
             const docRef = doc(colRef, props.user.uid)
-
             // Listening for real-time updates
             const unsubscribe = onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -142,7 +176,6 @@ const ChatList = (props) => {
                     fetchChatParticipants(chatUids)
                 }
             })
-
             // Cleanup on unmount
             return () => unsubscribe()
         }
@@ -154,9 +187,14 @@ const ChatList = (props) => {
         e.currentTarget.style.backgroundColor = "#f6f6fe"
         selectedChat.current = e.currentTarget
         if (conversation.type === "user") {
+            const [uid, otherUserUid] = [
+                sessionStorage.getItem("uid"),
+                conversation.uid
+            ]
+            const uids = [uid, otherUserUid].sort()
             props.selectChat({
                 type: "user",
-                uid: sha1(conversation.uid + sessionStorage.getItem("uid"))
+                uid: sha1(uids[0] + uids[1])
             })
             sessionStorage.setItem("other-user-uid", conversation.uid)
             sessionStorage.setItem("other-user-photoURL", conversation.photoURL)
@@ -202,79 +240,124 @@ const ChatList = (props) => {
     }
 
     return (
-        <section
-            className="chat-list"
-            style={{
-                width: props.users ? "100%" : "30%",
-                borderRight: props.users
-                    ? "none"
-                    : "0.5px solid rgba(198, 198, 198, 0.726)",
-                padding: props.users ? "0px" : "15px",
-                minHeight: props.users && "165px"
-            }}
-        >
-            {!props.users && <Searchbar setSearchedUsers={setSearchedUsers} />}
-            {props.users
-                ? props.users.map((user) => (
-                      <div
-                          className="chat-item"
-                          style={{
-                              width: "100%",
-                              justifyContent: "space-between",
-                              paddingLeft: props.users ? "0px" : "5px",
-                              cursor: props.users ? "initial" : "pointer"
-                          }}
-                          key={user.uid}
-                      >
-                          <div className="user-info">
-                              <img
-                                  src={user.photoURL}
-                                  alt="user avatar"
-                                  className="profile-pic"
-                              />
-                              <div className="user-chat">
-                                  <h4 style={{ margin: 0 }}>{user.name}</h4>
-                              </div>
-                          </div>
-                          <div
-                              className="custom-checkbox"
-                              onClick={(e) => {
-                                  e.target.classList.toggle(
-                                      "custom-checkbox-clicked"
-                                  )
-                                  e.target.classList.contains(
-                                      "custom-checkbox-clicked"
-                                  )
-                                      ? addGroupMember(user)
-                                      : removeGroupMember(user)
-                              }}
-                          />
-                      </div>
-                  ))
-                : conversations.map((chat, i) =>
-                      chat ? (
+        <>
+            <section
+                className="chat-list"
+                style={{
+                    width: props.users ? "100%" : "30%",
+                    borderRight: props.users
+                        ? "none"
+                        : "0.5px solid rgba(198, 198, 198, 0.726)",
+                    padding: props.users ? "0px" : "15px",
+                    minHeight: props.users && "165px"
+                }}
+            >
+                {!props.users && (
+                    <Searchbar
+                        setSearchedChats={setChats}
+                        chats={chats}
+                        setSearchMode={setSearchMode}
+                    />
+                )}
+                {props.users
+                    ? props.users.map((user) => (
                           <div
                               className="chat-item"
-                              key={chat.uid}
-                              onClick={(e) => {
-                                  showChat(e, chat)
+                              style={{
+                                  width: "100%",
+                                  justifyContent: "space-between",
+                                  paddingLeft: props.users ? "0px" : "5px",
+                                  cursor: props.users ? "initial" : "pointer"
                               }}
+                              key={user.uid}
                           >
-                              <img
-                                  src={chat.photoURL}
-                                  alt="user avatar"
-                                  className="profile-pic"
-                              />
-                              <div className="user-chat">
-                                  <h4 style={{ margin: 0 }}>{chat.name}</h4>
-                                  <span className="latest-msg">
-                                      {decryptMessage(latestMsgs[i])}
-                                  </span>
+                              <div className="user-info">
+                                  <img
+                                      src={user.photoURL}
+                                      alt="user avatar"
+                                      className="profile-pic"
+                                  />
+                                  <div className="user-chat">
+                                      <h4 style={{ margin: 0 }}>{user.name}</h4>
+                                  </div>
                               </div>
+                              <div
+                                  className="custom-checkbox"
+                                  onClick={(e) => {
+                                      e.target.classList.toggle(
+                                          "custom-checkbox-clicked"
+                                      )
+                                      e.target.classList.contains(
+                                          "custom-checkbox-clicked"
+                                      )
+                                          ? addGroupMember(user)
+                                          : removeGroupMember(user)
+                                  }}
+                              />
                           </div>
-                      ) : null
-                  )}
-        </section>
+                      ))
+                    : chats.map((chat, i) =>
+                          chat ? (
+                              <div
+                                  className="chat-item"
+                                  key={chat.uid}
+                                  onClick={(e) => {
+                                      showChat(e, chat)
+                                  }}
+                              >
+                                  <img
+                                      src={chat.photoURL}
+                                      alt="user avatar"
+                                      className="profile-pic"
+                                  />
+                                  <div className="user-chat">
+                                      <h4 style={{ margin: 0 }}>{chat.name}</h4>
+                                      <span className="latest-msg">
+                                          {decryptMessage(latestMsgs[i])}
+                                      </span>
+                                  </div>
+                              </div>
+                          ) : null
+                      )}
+            </section>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right"
+                }}
+                open={showNotification}
+                autoHideDuration={4000}
+                onClose={() => setShowNotification(false)}
+            >
+                <SnackbarContent
+                    sx={{
+                        backgroundColor: "#acacac",
+                        color: "black",
+                        borderRadius: "15px",
+                        maxWidth: "400px"
+                    }}
+                    message={
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            <img
+                                src={notificationContent.avatar}
+                                alt="user avatar"
+                                style={{ marginRight: "10px" }}
+                                className="notfication-profile-pic"
+                            />
+                            <div className="notification-text">
+                                <h4>
+                                    {notificationContent.name} sent you a
+                                    message
+                                </h4>
+                                <span className="notification-msg">
+                                    {decryptMessage(notificationContent.msg)}
+                                </span>
+                            </div>
+                        </div>
+                    }
+                />
+            </Snackbar>
+        </>
     )
 }
 

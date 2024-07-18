@@ -1,33 +1,34 @@
 import axios from "axios"
 import "./searchbar.css"
-import { useRef } from "react"
 
 const Searchbar = (props) => {
-    const timeoutId = useRef(NaN)
-    const searchUser = (e) => {
-        !isNaN(timeoutId.current) && clearInterval(timeoutId.current)
-        timeoutId.current = setTimeout(async () => {
+    const searchUser = async (e) => {
+        if (!e.target.value.length) {
+            props.setSearchedChats(JSON.parse(sessionStorage.getItem("chats")))
+        } else if (e.target.value.length > 2) {
             try {
                 const res = await axios.get(
-                    `${import.meta.env.VITE_DEV_API_URL}user-profile/${
+                    `${import.meta.env.VITE_DEV_API_URL}search-user/?query=${
                         e.target.value
                     }`
                 )
                 !res.data
-                    ? props.setSearchedUsers([])
-                    : props.setSearchedUsers([
-                          {
-                              name: res.data.name,
-                              uid: res.data.user,
-                              photoURL: res.data.avatar,
-                              type: "user"
-                          }
-                      ])
+                    ? props.setSearchedChats([])
+                    : props.setSearchedChats(
+                          res.data.map((chat) => {
+                              return {
+                                  name: chat.name,
+                                  uid: chat.user,
+                                  photoURL: chat.avatar,
+                                  type: "user"
+                              }
+                          })
+                      )
             } catch (error) {
-                props.setSearchedUsers([])
+                props.setSearchedChats([])
                 console.error(error)
             }
-        }, 1000)
+        }
     }
 
     return (
@@ -39,6 +40,8 @@ const Searchbar = (props) => {
                 className="searchbar"
                 placeholder="Search users"
                 onChange={searchUser}
+                onFocus={() => props.setSearchMode && props.setSearchMode(true)}
+                onBlur={() => props.setSearchMode && props.setSearchMode(false)}
                 style={{ width: props.width ? props.width : "90%" }}
             />
         </div>

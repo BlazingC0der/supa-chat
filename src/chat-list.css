@@ -71,3 +71,28 @@
     transform: rotate(45deg);
     display: block;
 }
+
+.notfication-profile-pic {
+    height: 30px;
+    width: 30px;
+}
+
+.notification-text{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    row-gap: 5px;
+    width: 70%;
+}
+
+.notification-text>h4{
+    margin: 0;
+}
+
+.notification-msg{
+    width: 100%;
+    text-wrap: nowrap;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
