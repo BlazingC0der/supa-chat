@@ -13,14 +13,11 @@ import {
 import Searchbar from "./searchbar"
 import { decryptMessage } from "./utils/decrypt"
 import groupProfileImg from "./assets/group.png"
-import { Snackbar, SnackbarContent } from "@mui/material"
 
 const ChatList = (props) => {
     const selectedChat = useRef(null)
     const [chats, setChats] = useState([])
     const [latestMsgs, setLatestMsgs] = useState([])
-    const [showNotification, setShowNotification] = useState(false)
-    const [notificationContent, setNotificationContent] = useState({})
     const [searchMode, setSearchMode] = useState(false)
 
     const msgRefs = useMemo(
@@ -44,6 +41,17 @@ const ChatList = (props) => {
     )
 
     useEffect(() => {
+        ;(async () => {
+            try {
+                const permisssion = await Notification.requestPermission()
+                console.log("permission granted", permisssion)
+            } catch (error) {
+                console.error(error)
+            }
+        })()
+    }, [])
+
+    useEffect(() => {
         if (!props.users) {
             if (msgRefs.length) {
                 const unsubscribers = msgRefs.map((ref, i) => {
@@ -62,18 +70,23 @@ const ChatList = (props) => {
                             newLatestMsgs[i] = latestMsg[0]?.text
                                 ? latestMsg[0]?.text
                                 : latestMsg[0]?.filename
-                            console.log("LM",latestMsg[0]);
                             if (
-                                !searchMode && latestMsg[0]&&
+                                !searchMode &&
+                                latestMsg[0] &&
                                 latestMsg[0]?.uid !==
                                     sessionStorage.getItem("uid")
                             ) {
-                                setNotificationContent({
-                                    msg: newLatestMsgs[i],
-                                    name: chats[i].name,
-                                    avatar: chats[i].photoURL
-                                })
-                                setShowNotification(true)
+                                prevLatestMsgs.length >= msgRefs.length - 1 &&
+                                    new Notification(
+                                        `${chats[i].name} sent a message`,
+                                        {
+                                            body: decryptMessage(
+                                                latestMsg[0]?.text ||
+                                                    latestMsg[0]?.filename
+                                            ),
+                                            icon: chats[i].photoURL
+                                        }
+                                    )
                             }
                             return newLatestMsgs
                         })
@@ -320,43 +333,6 @@ const ChatList = (props) => {
                           ) : null
                       )}
             </section>
-            <Snackbar
-                anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right"
-                }}
-                open={showNotification}
-                autoHideDuration={4000}
-                onClose={() => setShowNotification(false)}
-            >
-                <SnackbarContent
-                    sx={{
-                        backgroundColor: "#acacac",
-                        color: "black",
-                        borderRadius: "15px",
-                        maxWidth: "400px"
-                    }}
-                    message={
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                            <img
-                                src={notificationContent.avatar}
-                                alt="user avatar"
-                                style={{ marginRight: "10px" }}
-                                className="notfication-profile-pic"
-                            />
-                            <div className="notification-text">
-                                <h4>
-                                    {notificationContent.name} sent you a
-                                    message
-                                </h4>
-                                <span className="notification-msg">
-                                    {decryptMessage(notificationContent.msg)}
-                                </span>
-                            </div>
-                        </div>
-                    }
-                />
-            </Snackbar>
         </>
     )
 }
