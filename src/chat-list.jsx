@@ -19,6 +19,7 @@ const ChatList = (props) => {
     const [chats, setChats] = useState([])
     const [latestMsgs, setLatestMsgs] = useState([])
     const [searchMode, setSearchMode] = useState(false)
+    const initRender = useRef(true)
 
     const msgRefs = useMemo(
         () =>
@@ -44,12 +45,16 @@ const ChatList = (props) => {
         ;(async () => {
             try {
                 const permisssion = await Notification.requestPermission()
-                console.log("permission granted", permisssion)
+                console.log("permission ", permisssion)
             } catch (error) {
                 console.error(error)
             }
         })()
     }, [])
+
+    useEffect(() => {
+        console.log("latestMsgs", latestMsgs, msgRefs.length)
+    }, [latestMsgs])
 
     useEffect(() => {
         if (!props.users) {
@@ -77,36 +82,21 @@ const ChatList = (props) => {
                                     sessionStorage.getItem("uid")
                             ) {
                                 prevLatestMsgs.length >= msgRefs.length - 1 &&
-                                    new Notification(
-                                        `${chats[i].name} sent a message`,
-                                        {
-                                            body: decryptMessage(
-                                                latestMsg[0]?.text ||
-                                                    latestMsg[0]?.filename
-                                            ),
-                                            icon: chats[i].photoURL
-                                        }
-                                    )
+                                !initRender.current
+                                    ? new Notification(
+                                          `${chats[i].name} sent a message`,
+                                          {
+                                              body: decryptMessage(
+                                                  latestMsg[0]?.text ||
+                                                      latestMsg[0]?.filename
+                                              ),
+                                              icon: chats[i].photoURL
+                                          }
+                                      )
+                                    : (initRender.current = false)
                             }
                             return newLatestMsgs
                         })
-                        // setChats((prevChats) => {
-                        //     const tempMsgRefs = [...msgRefs]
-                        //     let changedIndex
-                        //     const updatedChats = prevChats.filter(
-                        //         (chat, i) => {
-                        //             if (chat.uid !== chats[i].uid) {
-                        //                 tempMsgRefs = tempMsgRefs.splice(i, 1)
-                        //                 changedIndex = i
-                        //                 return true
-                        //             }
-                        //         }
-                        //     )
-                        //     updatedChats.unshift({
-                        //         ...chats[i]
-                        //     })
-                        //     return [...updatedChats]
-                        // })
                     })
                 })
                 // Clean up the onSnapshot listeners on unmount
