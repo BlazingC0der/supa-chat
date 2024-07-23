@@ -53,10 +53,6 @@ const ChatList = (props) => {
     }, [])
 
     useEffect(() => {
-        console.log("latestMsgs", latestMsgs, msgRefs.length)
-    }, [latestMsgs])
-
-    useEffect(() => {
         if (!props.users) {
             if (msgRefs.length) {
                 const unsubscribers = msgRefs.map((ref, i) => {

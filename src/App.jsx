@@ -112,12 +112,33 @@ function App() {
             sessionStorage.getItem("uid"),
             sessionStorage.getItem("other-user-uid")
         ]
-        const uids = [uid,otherUserUid].sort()
+        const uids = [uid, otherUserUid].sort()
         try {
             const dirColRef = collection(firestore, "chat-directory")
             const dirDocRefSelf = doc(dirColRef, uid)
             const chatColRef = collection(firestore, selectedChat.uid)
             const participantsDocRef = doc(chatColRef, "participants")
+            // adding msg doc
+            textFlag
+                ? await addDoc(chatColRef, {
+                      text: CryptoJS.AES.encrypt(
+                          msg,
+                          import.meta.env.VITE_SECRET_KEY
+                      ).toString(),
+                      createdAt: serverTimestamp(),
+                      uid
+                  })
+                : await addDoc(chatColRef, {
+                      file: msg,
+                      filename: CryptoJS.AES.encrypt(
+                          filename,
+                          import.meta.env.VITE_SECRET_KEY
+                      ).toString(),
+                      createdAt: serverTimestamp(),
+                      uid,
+                      size: fileSize,
+                      type: fileType
+                  })
             if (!groupMsg) {
                 const dirDocRefOtherUser = doc(dirColRef, otherUserUid)
                 await setDoc(
@@ -157,28 +178,6 @@ function App() {
                     { merge: true }
                 )
             }
-            // adding msg doc
-            textFlag
-                ? await addDoc(chatColRef, {
-                      text: CryptoJS.AES.encrypt(
-                          msg,
-                          import.meta.env.VITE_SECRET_KEY
-                      ).toString(),
-                      createdAt: serverTimestamp(),
-                      uid
-                  })
-                : await addDoc(chatColRef, {
-                      file: msg,
-                      filename: CryptoJS.AES.encrypt(
-                          filename,
-                          import.meta.env.VITE_SECRET_KEY
-                      ).toString(),
-                      createdAt: serverTimestamp(),
-                      uid,
-                      size: fileSize,
-                      type: fileType
-                  })
-            console.log("Document successfully written!")
         } catch (error) {
             console.error("Error writing document: ", error)
         }

@@ -48,9 +48,9 @@ const ChatBox = (props) => {
 
     const sendMessage = async (e) => {
         e.preventDefault()
+        const msgContent = formValue
         try {
-            await props.send(formValue, props.selectedChat.type === "group")
-            setFormValue("")
+            await props.send(msgContent, props.selectedChat.type === "group")
             scrollMarker.current.scrollIntoView({ behavior: "smooth" })
         } catch (error) {
             console.error(error)
