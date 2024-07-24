@@ -5,6 +5,7 @@ const ChatMessage = (props) => {
     const messageClass =
         props.uid === sessionStorage.getItem("uid") ? "sent" : "received"
     let otherUserProfileImg
+    let otherUserDisplayName
     let groupMembersUids
     let groupMembersNames
     let groupMembersProfileImgs
@@ -19,6 +20,9 @@ const ChatMessage = (props) => {
         otherUserProfileImg = props.groupChat
             ? groupMembersProfileImgs[groupMembersUids.indexOf(props.uid)]
             : sessionStorage.getItem("other-user-photoURL")
+        otherUserDisplayName = props.groupChat
+            ? groupMembersNames[groupMembersUids.indexOf(props.uid)]
+            : sessionStorage.getItem("other-user-displayName")
     }
 
     return (
@@ -37,7 +41,24 @@ const ChatMessage = (props) => {
                     <div style={{ height: "50px", width: "50px" }}></div>
                 )}
                 {!props.isFile ? (
-                    <p className="msg-content">{props.text}</p>
+                    <p className="msg-content">
+                        {props.showProfileImg && (
+                            <>
+                                <span
+                                    style={{
+                                        fontWeight: "bold",
+                                        fontSize: "10px"
+                                    }}
+                                >
+                                    {messageClass === "sent"
+                                        ? sessionStorage.getItem("displayName")
+                                        : otherUserDisplayName}
+                                </span>
+                                <br />
+                            </>
+                        )}
+                        {props.text}
+                    </p>
                 ) : props.fileType.includes("application") ? (
                     <a
                         className="msg-content file-link"

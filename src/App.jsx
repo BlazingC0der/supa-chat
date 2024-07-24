@@ -17,6 +17,7 @@ import ChatList from "./chat-list"
 import CryptoJS from "crypto-js"
 import sha1 from "sha1"
 import GroupModal from "./group-creation-modal"
+import ChatHeader from "./chat-header"
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -228,6 +229,12 @@ function App() {
         }
     }
 
+    const logOut = () => {
+        sessionStorage.clear()
+        setSelectedChat(null)
+        signOut(auth)
+    }
+
     return (
         <div className="App">
             <GroupModal
@@ -237,24 +244,12 @@ function App() {
                 createGroup={createGroup}
             />
             {user && (
-                <header>
-                    <button
-                        className="grouping-btn"
-                        onClick={() => setOpenGroupModal(true)}
-                    >
-                        New Group
-                    </button>
-                    <button
-                        className="sign-out"
-                        onClick={() => {
-                            sessionStorage.clear()
-                            setSelectedChat(null)
-                            signOut(auth)
-                        }}
-                    >
-                        Sign Out
-                    </button>
-                </header>
+                <ChatHeader
+                    signOut={logOut}
+                    openGroupModal={() => setOpenGroupModal(true)}
+                    chatName={selectedChat?.name}
+                    chatImg={selectedChat?.avatar}
+                />
             )}
             <section className="chats">
                 {user ? (

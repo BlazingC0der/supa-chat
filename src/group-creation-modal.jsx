@@ -95,6 +95,7 @@ const GroupModal = (props) => {
                         <UserList
                             users={searchedUsers}
                             mutateMembers={setGroupMembers}
+                            selectionMode
                         />
                     </ScrollableContainer>
                     <Button

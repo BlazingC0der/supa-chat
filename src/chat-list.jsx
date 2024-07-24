@@ -13,6 +13,7 @@ import {
 import Searchbar from "./searchbar"
 import { decryptMessage } from "./utils/decrypt"
 import groupProfileImg from "./assets/group.png"
+import { CircularProgress } from "@mui/material"
 
 const ChatList = (props) => {
     const selectedChat = useRef(null)
@@ -193,17 +194,30 @@ const ChatList = (props) => {
             const uids = [uid, otherUserUid].sort()
             props.selectChat({
                 type: "user",
-                uid: sha1(uids[0] + uids[1])
+                uid: sha1(uids[0] + uids[1]),
+                name: conversation.name,
+                avatar: conversation.photoURL
             })
             sessionStorage.setItem("other-user-uid", conversation.uid)
             sessionStorage.setItem("other-user-photoURL", conversation.photoURL)
             sessionStorage.setItem("other-user-displayName", conversation.name)
         } else {
+            const members = conversation.displayNames.map(
+                (displayName, index) => {
+                    return {
+                        uid: conversation.uids[index],
+                        name: displayName,
+                        photoURL: conversation.photoURLs[index]
+                    }
+                }
+            )
             props.selectChat({
                 type: "group",
-                uid: conversation.uid
+                uid: conversation.uid,
+                name: conversation.name,
+                avatar: conversation.photoURL,
+                members
             })
-
             sessionStorage.setItem(
                 "other-user-uids",
                 JSON.stringify(conversation.uids)
@@ -243,81 +257,93 @@ const ChatList = (props) => {
             <section
                 className="chat-list"
                 style={{
-                    width: props.users ? "100%" : "30%",
+                    width: props.users ? "100%" : "25vw",
                     borderRight: props.users
                         ? "none"
                         : "0.5px solid rgba(198, 198, 198, 0.726)",
-                    padding: props.users ? "0px" : "15px",
-                    minHeight: props.users && "165px"
+                    padding: props.users
+                        ? props.selectionMode
+                            ? "0px"
+                            : "10px"
+                        : "15px",
+                    minHeight: props.users && "165px",
+                    justifyContent:
+                        props.users || chats.length ? "flex-start" : "center"
                 }}
             >
-                {!props.users && (
+                {!props.users && chats.length > 0 && (
                     <Searchbar
                         setSearchedChats={setChats}
                         chats={chats}
                         setSearchMode={setSearchMode}
                     />
                 )}
-                {props.users
-                    ? props.users.map((user) => (
-                          <div
-                              className="chat-item"
-                              style={{
-                                  width: "100%",
-                                  justifyContent: "space-between",
-                                  paddingLeft: props.users ? "0px" : "5px",
-                                  cursor: props.users ? "initial" : "pointer"
-                              }}
-                              key={user.uid}
-                          >
-                              <div className="user-info">
-                                  <img
-                                      src={user.photoURL}
-                                      alt="user avatar"
-                                      className="profile-pic"
-                                  />
-                                  <div className="user-chat">
-                                      <h4 style={{ margin: 0 }}>{user.name}</h4>
-                                  </div>
-                              </div>
-                              <div
-                                  className="custom-checkbox"
-                                  onClick={(e) => {
-                                      e.target.classList.toggle(
-                                          "custom-checkbox-clicked"
-                                      )
-                                      e.target.classList.contains(
-                                          "custom-checkbox-clicked"
-                                      )
-                                          ? addGroupMember(user)
-                                          : removeGroupMember(user)
-                                  }}
-                              />
-                          </div>
-                      ))
-                    : chats.map((chat, i) =>
-                          chat ? (
-                              <div
-                                  className="chat-item"
-                                  key={chat.uid}
-                                  onClick={(e) => {
-                                      showChat(e, chat)
-                                  }}
-                              >
-                                  <img
-                                      src={chat.photoURL}
-                                      alt="user avatar"
-                                      className="profile-pic"
-                                  />
-                                  <div className="user-chat">
-                                      <h4 style={{ margin: 0 }}>{chat.name}</h4>
-                                      <span className="latest-msg">
-                                          {decryptMessage(latestMsgs[i])}
-                                      </span>
-                                  </div>
-                              </div>
-                          ) : null
-                      )}
+                {props.users ? (
+                    props.users.map((user) => (
+                        <div
+                            className="chat-item"
+                            style={{
+                                width: "100%",
+                                justifyContent: "space-between",
+                                paddingLeft: props.users ? "0px" : "5px",
+                                cursor: props.users ? "initial" : "pointer"
+                            }}
+                            key={user.uid}
+                        >
+                            <div className="user-info">
+                                <img
+                                    src={user.photoURL}
+                                    alt="user avatar"
+                                    className="profile-pic"
+                                />
+                                <div className="user-chat">
+                                    <h4 style={{ margin: 0 }}>{user.name}</h4>
+                                </div>
+                            </div>
+                            {props.selectionMode && (
+                                <div
+                                    className="custom-checkbox"
+                                    onClick={(e) => {
+                                        e.target.classList.toggle(
+                                            "custom-checkbox-clicked"
+                                        )
+                                        e.target.classList.contains(
+                                            "custom-checkbox-clicked"
+                                        )
+                                            ? addGroupMember(user)
+                                            : removeGroupMember(user)
+                                    }}
+                                />
+                            )}
+                        </div>
+                    ))
+                ) : !chats.length ? (
+                    <CircularProgress size={100} />
+                ) : (
+                    chats.map((chat, i) =>
+                        chat ? (
+                            <div
+                                className="chat-item"
+                                key={chat.uid}
+                                onClick={(e) => {
+                                    showChat(e, chat)
+                                }}
+                            >
+                                <img
+                                    src={chat.photoURL}
+                                    alt="user avatar"
+                                    className="profile-pic"
+                                />
+                                <div className="user-chat">
+                                    <h4 style={{ margin: 0 }}>{chat.name}</h4>
+                                    <span className="latest-msg">
+                                        {decryptMessage(latestMsgs[i])}
+                                    </span>
+                                </div>
+                            </div>
+                        ) : null
+                    )
+                )}
             </section>
         </>
     )

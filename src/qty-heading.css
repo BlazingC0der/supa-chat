@@ -1,0 +1,11 @@
+.qty {
+    background-color: rgb(237, 242, 247);
+    border-radius: 50%;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.qty-heading{
+    margin: 0;
+}

@@ -1,0 +1,30 @@
+.file-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    width: 90%;
+    overflow-y: scroll;
+    row-gap: 20px;
+}
+
+.file-data {
+    display: flex;
+    align-items: center;
+    column-gap: 3px;
+}
+
+.download-file-btn {
+    background-color: white;
+    border: 2px solid rgb(0, 0, 128);
+    border-radius: 8px;
+    color: rgb(0, 0, 128);
+    cursor: pointer;
+}
+
+.file-chip{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
