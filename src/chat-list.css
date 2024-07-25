@@ -25,6 +25,7 @@
     border-radius: 6px;
     margin-right: 10px;
     border-radius: 10px;
+    object-fit: cover;
 }
 
 .user-chat {
@@ -98,4 +99,10 @@
 .MuiCircularProgress-circle {
     color: rgb(0, 0, 128);
     margin: auto;
+}
+
+@media (max-width: 850px) {
+    .chat-list {
+        width: 100% !important;
+    }
 }

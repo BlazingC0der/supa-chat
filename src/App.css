@@ -28,7 +28,13 @@
     row-gap: 20px;
 }
 
-.chats{
+.chats {
     display: flex;
     height: 90vh;
+}
+
+@media (max-width: 850px) {
+    .chats {
+        height: 95vh;
+    }
 }

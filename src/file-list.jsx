@@ -9,7 +9,7 @@ const FileList = (props) => {
                 const filename = decryptMessage(file.filename)
                 const extension = filename.substr(filename.indexOf(".") + 1).toUpperCase()
                 return (
-                    <div className="file-chip">
+                    <div className="file-chip" key={file.id}>
                         <div className="file-data">
                             <img
                                 src={FileIcon}

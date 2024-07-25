@@ -4,23 +4,50 @@ import "./chat-header.css"
 const ChatHeader = (props) => {
     const [showMsgMenu, setShowMsgMenu] = useState(false)
 
+    const showGroupInfoOnPhone = () => {
+        if (window.innerWidth <= 850) {
+            document.querySelector(".chat-directory").style.display = "block"
+            document.querySelector(".chat-area").style.display = "none"
+        }
+    }
+
+    const switchScreenOnPhone = (e) => {
+        e.stopPropagation()
+        if (window.innerWidth <= 850) {
+            const chatDirRef = document.querySelector(".chat-directory")
+            const chatAreaRef = document.querySelector(".chat-area")
+            if (chatDirRef.style.display === "block") {
+                chatDirRef.style.display = "none"
+                chatAreaRef.style.display = "flex"
+            } else {
+                document.querySelector(".chat-box").style.display = "none"
+                document.querySelector(".chat-list").style.display = "flex"
+                document.querySelector(".msg-controls").style.display = "flex"
+                document.querySelector(".chat-info").style.display = "none"
+                console.log(chatDirRef.style.display)
+            }
+        }
+    }
+
     return (
         <header>
             <div className="msg-controls">
                 <h4>Messages</h4>
-                <button
-                    className="grouping-btn"
-                    onClick={() => setShowMsgMenu((show) => !show)}
-                >
-                    <span className="material-symbols-outlined">add</span>
-                </button>
+                {window.innerWidth > 850 && (
+                    <button
+                        className="grouping-btn"
+                        onClick={() => setShowMsgMenu((show) => !show)}
+                    >
+                        <span className="material-symbols-outlined">add</span>
+                    </button>
+                )}
                 {showMsgMenu && (
                     <div className="msg-menu">
                         <div
                             className="chat-option"
                             onClick={() => setShowMsgMenu(false)}
                         >
-                            <span class="material-symbols-outlined">
+                            <span className="material-symbols-outlined">
                                 person_add
                             </span>
                             New Chat
@@ -32,7 +59,7 @@ const ChatHeader = (props) => {
                                 setShowMsgMenu(false)
                             }}
                         >
-                            <span class="material-symbols-outlined">
+                            <span className="material-symbols-outlined">
                                 group_add
                             </span>
                             New Group
@@ -42,7 +69,17 @@ const ChatHeader = (props) => {
             </div>
             <div className="chat-info">
                 {props.chatName && (
-                    <div className="chat-title">
+                    <div className="chat-title" onClick={showGroupInfoOnPhone}>
+                        {window.innerWidth <= 850 && (
+                            <button
+                                className="back-btn"
+                                onClick={switchScreenOnPhone}
+                            >
+                                <span className="material-symbols-outlined">
+                                    arrow_back
+                                </span>
+                            </button>
+                        )}
                         <img
                             className="chat-icon"
                             src={props.chatImg}
@@ -55,7 +92,9 @@ const ChatHeader = (props) => {
                     Sign Out
                 </button>
             </div>
-            <div className="chat-dir"><h4>Directory</h4></div>
+            <div className="chat-dir">
+                <h4>Directory</h4>
+            </div>
         </header>
     )
 }

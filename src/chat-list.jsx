@@ -182,6 +182,12 @@ const ChatList = (props) => {
     }, [props.user])
 
     const showChat = (e, conversation) => {
+        if (window.innerWidth <= 850) {
+            document.querySelector(".chat-list").style.display = "none"
+            document.querySelector(".chat-box").style.display = "flex"
+            document.querySelector(".msg-controls").style.display = "none"
+            document.querySelector(".chat-info").style.display = "flex"
+        }
         selectedChat.current &&
             (selectedChat.current.style.backgroundColor = "transparent")
         e.currentTarget.style.backgroundColor = "#f6f6fe"

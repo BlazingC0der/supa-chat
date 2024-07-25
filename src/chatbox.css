@@ -87,3 +87,17 @@
     height: 60%;
     border-bottom: 0.5px solid rgba(198, 198, 198, 0.726);
 }
+
+@media screen and (max-width: 850px) {
+    .chat-box {
+        display: none;
+        width: 100%;
+    }
+    .chat-directory{
+        display: none;
+        width: 100%;
+    }
+    .chat-area{
+        width: 100%;
+    }
+}

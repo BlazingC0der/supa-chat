@@ -44,7 +44,7 @@ const ChatBox = (props) => {
                 const newMessages = querySnapshot.docs.map((doc) => {
                     const msgData = doc.data()
                     if (msgData.file) {
-                        tempFiles.unshift({ ...msgData })
+                        tempFiles.unshift({ id: doc.id, ...msgData })
                     }
                     return {
                         id: doc.id,

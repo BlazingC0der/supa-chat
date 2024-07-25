@@ -47,12 +47,14 @@ header {
     display: flex;
     column-gap: 10px;
     align-items: center;
+    height: 100%;
 }
 
 .chat-icon {
     height: 50px;
     width: 50px;
     border-radius: 50%;
+    object-fit: cover;
 }
 
 .msg-menu {
@@ -88,9 +90,40 @@ header {
     box-sizing: border-box;
 }
 
+.back-btn {
+    all: unset;
+    height: fit-content;
+}
+
 @media (min-width: 1920px) {
     .msg-menu {
         top: 7vh;
         left: 16vw;
+    }
+}
+
+@media (max-width: 850px) {
+    .chat-title {
+        cursor: pointer;
+    }
+    .chat-dir,
+    .chat-info {
+        display: none;
+    }
+    .msg-controls,
+    .chat-info {
+        width: 100%;
+    }
+    header {
+        height: 5vh;
+        border-bottom: none;
+    }
+    .chat-icon {
+        height: 36px;
+        width: 38px;
+    }
+    .sign-out {
+        height: 3vh;
+        width: 24vw;
     }
 }

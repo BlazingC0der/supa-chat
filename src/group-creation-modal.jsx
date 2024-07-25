@@ -15,8 +15,8 @@ const ModalContent = styled(Box)({
     backgroundColor: "white",
     borderRadius: "15px",
     padding: "30px",
-    width: "50%",
-    height: "90%",
+    width: window.innerWidth <= 850 ? "90%" : "50%",
+    height: window.innerWidth <= 850 ? "60%" : "90%",
     overflowY: "auto",
     boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)"
 })

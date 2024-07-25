@@ -31,7 +31,7 @@
     order: -1;
 }
 
-.sent > .msg-visual{
+.sent > .msg-visual {
     order: -1;
 }
 
@@ -81,4 +81,11 @@
     object-fit: contain;
     border-radius: 10px;
     background-color: #000080;
+}
+
+@media (max-width: 850px) {
+    .msg-visual {
+        height: 137px;
+        width: 275px;
+    }
 }
