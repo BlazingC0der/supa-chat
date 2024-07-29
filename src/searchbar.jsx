@@ -20,6 +20,8 @@ const Searchbar = (props) => {
                                   name: chat.name,
                                   uid: chat.user,
                                   photoURL: chat.avatar,
+                                  fname: chat.firstname,
+                                  lname: chat.lastname,
                                   type: "user"
                               }
                           })

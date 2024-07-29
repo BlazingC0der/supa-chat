@@ -95,6 +95,32 @@ header {
     height: fit-content;
 }
 
+.msg-menu-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 5px;
+    width: 100%;
+    z-index: 2;
+    height: 125px;
+}
+
+.msg-menu-phone {
+    background-color: white;
+    width: 170px;
+    border-radius: 15px;
+    box-shadow: rgb(120, 120, 120) 0px 0px 5px;
+    position: absolute;
+    right: 15px;
+    z-index: 2;
+}
+
+.grouping-btn-phone{
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    padding: 10px 9px;
+}
+
 @media (min-width: 1920px) {
     .msg-menu {
         top: 7vh;

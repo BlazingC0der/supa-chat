@@ -35,7 +35,8 @@
     width: 65%;
 }
 
-.latest-msg {
+.latest-msg,
+.user-name {
     color: grey;
     white-space: nowrap;
     overflow: hidden;
@@ -97,7 +98,6 @@
 }
 
 .MuiCircularProgress-circle {
-    color: rgb(0, 0, 128);
     margin: auto;
 }
 

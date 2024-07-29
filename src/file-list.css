@@ -11,13 +11,14 @@
 .file-data {
     display: flex;
     align-items: center;
-    column-gap: 3px;
+    column-gap: 12px;
+    width: 60%;
 }
 
 .download-file-btn {
     background-color: white;
     border: 2px solid rgb(0, 0, 128);
-    border-radius: 8px;
+    border-radius: 10px;
     color: rgb(0, 0, 128);
     cursor: pointer;
 }
@@ -27,4 +28,15 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
+}
+
+.file-icon-wrapper{
+    height: fit-content;
+    width: fit-content;
+    padding: 6px;
+    color: rgb(66, 153, 225);
+    background-color: rgb(235, 248, 255);
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
 }

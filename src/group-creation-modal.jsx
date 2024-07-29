@@ -46,6 +46,7 @@ const createBtnStyle = {
     padding: "10px 0",
     textTransform: "initial"
 }
+
 const GroupModal = (props) => {
     const handleClose = () => props.openModal(false)
     const [searchedUsers, setSearchedUsers] = useState([])

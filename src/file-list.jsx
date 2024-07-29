@@ -7,17 +7,28 @@ const FileList = (props) => {
         <div className="file-list">
             {props.files.map((file) => {
                 const filename = decryptMessage(file.filename)
-                const extension = filename.substr(filename.indexOf(".") + 1).toUpperCase()
+                const extension = filename
+                    .substr(filename.indexOf(".") + 1)
+                    .toUpperCase()
                 return (
                     <div className="file-chip" key={file.id}>
                         <div className="file-data">
-                            <img
-                                src={FileIcon}
-                                style={{ width: "30px", height: "30px" }}
-                                alt="file icon"
-                            />
-                            <div>
-                                <h5 style={{ margin: 0 }}>{filename}</h5>
+                            <div className="file-icon-wrapper">
+                                <span class="material-symbols-outlined">
+                                    {`${file.type.includes("image") ? "image" : "description"}`}
+                                </span>
+                            </div>
+                            <div style={{ width: "100%" }}>
+                                <h5
+                                    style={{
+                                        margin: 0,
+                                        textOverflow: "ellipsis",
+                                        overflow: "hidden",
+                                        textWrap: "nowrap"
+                                    }}
+                                >
+                                    {filename}
+                                </h5>
                                 <span
                                     style={{
                                         color: "rgb(153, 153, 153)",
@@ -28,7 +39,10 @@ const FileList = (props) => {
                         </div>
                         <a href={file.file} download target="_blank">
                             <button className="download-file-btn">
-                                <span className="material-symbols-outlined">
+                                <span
+                                    className="material-symbols-outlined"
+                                    style={{ fontSize: "15px" }}
+                                >
                                     download
                                 </span>
                             </button>

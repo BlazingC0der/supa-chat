@@ -13,7 +13,7 @@ import {
 import Searchbar from "./searchbar"
 import { decryptMessage } from "./utils/decrypt"
 import groupProfileImg from "./assets/group.png"
-import { CircularProgress } from "@mui/material"
+import { CircularProgress, styled } from "@mui/material"
 
 const ChatList = (props) => {
     const selectedChat = useRef(null)
@@ -21,6 +21,8 @@ const ChatList = (props) => {
     const [latestMsgs, setLatestMsgs] = useState([])
     const [searchMode, setSearchMode] = useState(false)
     const initRender = useRef(true)
+
+    const Loader = styled(CircularProgress)({ color: "rgb(0, 0, 128)" })
 
     const msgRefs = useMemo(
         () =>
@@ -187,6 +189,7 @@ const ChatList = (props) => {
             document.querySelector(".chat-box").style.display = "flex"
             document.querySelector(".msg-controls").style.display = "none"
             document.querySelector(".chat-info").style.display = "flex"
+            document.querySelector(".msg-menu-controls").style.display = "none"
         }
         selectedChat.current &&
             (selectedChat.current.style.backgroundColor = "transparent")
@@ -245,7 +248,9 @@ const ChatList = (props) => {
             {
                 uid: user.uid.toString(),
                 name: user.name,
-                photoURL: user.photoURL
+                photoURL: user.photoURL,
+                fname: user.fname,
+                lname: user.lname
             }
         ])
     }
@@ -277,7 +282,7 @@ const ChatList = (props) => {
                         props.users || chats.length ? "flex-start" : "center"
                 }}
             >
-                {!props.users && chats.length > 0 && (
+                {!props.users && (
                     <Searchbar
                         setSearchedChats={setChats}
                         chats={chats}
@@ -304,6 +309,11 @@ const ChatList = (props) => {
                                 />
                                 <div className="user-chat">
                                     <h4 style={{ margin: 0 }}>{user.name}</h4>
+                                    {props.selectionMode && (
+                                        <span className="user-name">
+                                            {`${user.fname} ${user.lname}`}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                             {props.selectionMode && (
@@ -324,7 +334,13 @@ const ChatList = (props) => {
                         </div>
                     ))
                 ) : !chats.length ? (
-                    <CircularProgress size={100} />
+                    <div style={{ margin: "auto" }}>
+                        {!searchMode ? (
+                            <Loader size={100} />
+                        ) : (
+                            <h3>No Users Found</h3>
+                        )}
+                    </div>
                 ) : (
                     chats.map((chat, i) =>
                         chat ? (

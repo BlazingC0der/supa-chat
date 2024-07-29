@@ -22,6 +22,8 @@ const ChatHeader = (props) => {
             } else {
                 document.querySelector(".chat-box").style.display = "none"
                 document.querySelector(".chat-list").style.display = "flex"
+                document.querySelector(".msg-menu-controls").style.display =
+                    "block"
                 document.querySelector(".msg-controls").style.display = "flex"
                 document.querySelector(".chat-info").style.display = "none"
                 console.log(chatDirRef.style.display)
@@ -30,72 +32,118 @@ const ChatHeader = (props) => {
     }
 
     return (
-        <header>
-            <div className="msg-controls">
-                <h4>Messages</h4>
-                {window.innerWidth > 850 && (
-                    <button
-                        className="grouping-btn"
-                        onClick={() => setShowMsgMenu((show) => !show)}
-                    >
-                        <span className="material-symbols-outlined">add</span>
-                    </button>
-                )}
-                {showMsgMenu && (
-                    <div className="msg-menu">
-                        <div
-                            className="chat-option"
-                            onClick={() => setShowMsgMenu(false)}
+        <>
+            <header>
+                <div className="msg-controls">
+                    <h4>Messages</h4>
+                    {window.innerWidth > 850 && (
+                        <button
+                            className="grouping-btn"
+                            onClick={() => setShowMsgMenu((show) => !show)}
                         >
                             <span className="material-symbols-outlined">
-                                person_add
+                                add
                             </span>
-                            New Chat
-                        </div>
-                        <div
-                            className="chat-option"
-                            onClick={() => {
-                                props.openGroupModal()
-                                setShowMsgMenu(false)
-                            }}
-                        >
-                            <span className="material-symbols-outlined">
-                                group_add
-                            </span>
-                            New Group
-                        </div>
-                    </div>
-                )}
-            </div>
-            <div className="chat-info">
-                {props.chatName && (
-                    <div className="chat-title" onClick={showGroupInfoOnPhone}>
-                        {window.innerWidth <= 850 && (
-                            <button
-                                className="back-btn"
-                                onClick={switchScreenOnPhone}
+                        </button>
+                    )}
+                    {showMsgMenu && (
+                        <div className="msg-menu">
+                            <div
+                                className="chat-option"
+                                onClick={() => setShowMsgMenu(false)}
                             >
                                 <span className="material-symbols-outlined">
-                                    arrow_back
+                                    person_add
                                 </span>
-                            </button>
+                                New Chat
+                            </div>
+                            <div
+                                className="chat-option"
+                                onClick={() => {
+                                    props.openGroupModal()
+                                    setShowMsgMenu(false)
+                                }}
+                            >
+                                <span className="material-symbols-outlined">
+                                    group_add
+                                </span>
+                                New Group
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div className="chat-info">
+                    {props.chatName && (
+                        <div
+                            className="chat-title"
+                            onClick={showGroupInfoOnPhone}
+                        >
+                            {window.innerWidth <= 850 && (
+                                <button
+                                    className="back-btn"
+                                    onClick={switchScreenOnPhone}
+                                >
+                                    <span className="material-symbols-outlined">
+                                        arrow_back
+                                    </span>
+                                </button>
+                            )}
+                            <img
+                                className="chat-icon"
+                                src={props.chatImg}
+                                alt="chat icon"
+                            />
+                            <h4 className="chat-name">{props.chatName}</h4>
+                        </div>
+                    )}
+                    <button className="sign-out" onClick={props.signOut}>
+                        Sign Out
+                    </button>
+                </div>
+                <div className="chat-dir">
+                    <h4>Directory</h4>
+                </div>
+            </header>
+            {window.innerWidth <= 850 && (
+                <div className="msg-menu-controls">
+                    <div style={{ height: "100%", position: "relative" }}>
+                        {showMsgMenu && (
+                            <div className="msg-menu-phone">
+                                <div
+                                    className="chat-option"
+                                    onClick={() => setShowMsgMenu(false)}
+                                >
+                                    <span className="material-symbols-outlined">
+                                        person_add
+                                    </span>
+                                    New Chat
+                                </div>
+                                <div
+                                    className="chat-option"
+                                    onClick={() => {
+                                        props.openGroupModal()
+                                        setShowMsgMenu(false)
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined">
+                                        group_add
+                                    </span>
+                                    New Group
+                                </div>
+                            </div>
                         )}
-                        <img
-                            className="chat-icon"
-                            src={props.chatImg}
-                            alt="chat icon"
-                        />
-                        <h4 className="chat-name">{props.chatName}</h4>
+                        <button
+                            className="grouping-btn grouping-btn-phone"
+                            onClick={() => setShowMsgMenu((show) => !show)}
+                        >
+                            <span className="material-symbols-outlined">
+                                add
+                            </span>
+                        </button>
                     </div>
-                )}
-                <button className="sign-out" onClick={props.signOut}>
-                    Sign Out
-                </button>
-            </div>
-            <div className="chat-dir">
-                <h4>Directory</h4>
-            </div>
-        </header>
+                </div>
+            )}
+        </>
     )
 }
 

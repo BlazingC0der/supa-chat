@@ -18,19 +18,18 @@ const ChatBox = (props) => {
     const [messages, setMessages] = useState([])
     const [formValue, setFormValue] = useState("")
     const [files, setFiles] = useState([])
+    const [fileUploads, setFileUploads] = useState([])
     const scrollMarker = useRef()
     const fileInput = useRef()
 
     const messagesRef = useMemo(() => {
         setFiles([])
+        setFileUploads([])
+        scrollMarker.current?.scrollIntoView({ behavior: "smooth" })
         return props.selectedChat
             ? collection(props.firestore, props.selectedChat.uid)
             : null
     }, [props.selectedChat])
-
-    useEffect(() => {
-        scrollMarker.current.scrollIntoView({ behavior: "smooth" })
-    }, [props.auth])
 
     useEffect(() => {
         if (messagesRef) {
@@ -84,6 +83,8 @@ const ChatBox = (props) => {
         console.log("file", e.target.files[0])
         const size = formatFileSize(e.target.files[0].size)
         const type = e.target.files[0].type
+        setFileUploads([...fileUploads, { filename, size, type }])
+        scrollMarker.current.scrollIntoView({ behavior: "smooth" })
         const storageRef = ref(
             storage,
             `files/${props.selectedChat.uid}/${filename}`
@@ -92,6 +93,9 @@ const ChatBox = (props) => {
         uploadBytes(storageRef, e.target.files[0])
             .then((snapshot) => {
                 console.log("Uploaded a blob or file!", snapshot)
+                setFileUploads((files) => {
+                    return files.filter((file) => file.filename !== filename)
+                })
                 getDownloadURL(storageRef)
                     .then((url) => {
                         console.log("File available at", url)
@@ -152,6 +156,16 @@ const ChatBox = (props) => {
                                 />
                             )
                         )}
+                    {fileUploads.map((file) => (
+                        <ChatMessage
+                            key={file.filename}
+                            filename={file.filename}
+                            fileSize={file.size}
+                            fileType={file.type}
+                            isFile
+                            loading
+                        />
+                    ))}
                     <span ref={scrollMarker}></span>
                 </div>
                 <form onSubmit={sendMessage} className="msg-form">

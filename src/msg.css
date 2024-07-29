@@ -25,14 +25,9 @@
     align-self: flex-end;
 }
 
-.sent > .msg-content {
+.sent .msg-content {
     background-color: #000080;
     color: white;
-    order: -1;
-}
-
-.sent > .msg-visual {
-    order: -1;
 }
 
 .file-msg {
@@ -83,9 +78,24 @@
     background-color: #000080;
 }
 
+.img-loader {
+    color: white;
+}
+
 @media (max-width: 850px) {
     .msg-visual {
         height: 137px;
         width: 275px;
+    }
+    .sent .msg-content,
+    .sent .msg-visual {
+        border-top-right-radius: 0;
+    }
+    .received .msg-content,
+    .received .msg-visual {
+        border-top-left-radius: 0;
+    }
+    .user-profile-img {
+        border-radius: 50%;
     }
 }

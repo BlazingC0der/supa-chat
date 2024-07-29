@@ -80,6 +80,7 @@ function App() {
                             }
                         )
                         console.log("User signed in:", user)
+                        // TODO: store user's fname + lname in sessionStorage
                         sessionStorage.setItem("uid", user.uid)
                         sessionStorage.setItem("photoURL", userInfo.data.avatar)
                         sessionStorage.setItem(
@@ -185,6 +186,7 @@ function App() {
     }
 
     const createGroup = async (members, groupName) => {
+        console.log("members", members)
         const dirColRef = collection(firestore, "chat-directory")
         console.log("members", members)
         const dirDocRefsGroupMembers = members.map((member) =>
@@ -258,7 +260,6 @@ function App() {
                             selectChat={setSelectedChat}
                             user={user}
                             firestore={firestore}
-                            createGroup={createGroup}
                         />
                         <ChatBox
                             auth={auth}
