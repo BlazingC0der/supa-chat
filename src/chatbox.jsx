@@ -25,7 +25,6 @@ const ChatBox = (props) => {
     const messagesRef = useMemo(() => {
         setFiles([])
         setFileUploads([])
-        scrollMarker.current?.scrollIntoView({ behavior: "smooth" })
         return props.selectedChat
             ? collection(props.firestore, props.selectedChat.uid)
             : null
@@ -58,13 +57,16 @@ const ChatBox = (props) => {
         }
     }, [messagesRef])
 
+    useEffect(() => {
+        scrollMarker.current.scrollIntoView({ behavior: "smooth" })
+    }, [messages,fileUploads])
+
     const sendMessage = async (e) => {
         e.preventDefault()
         const msgContent = formValue
         setFormValue("")
         try {
             await props.send(msgContent, props.selectedChat.type === "group")
-            scrollMarker.current.scrollIntoView({ behavior: "smooth" })
         } catch (error) {
             console.error(error)
         }
@@ -84,7 +86,6 @@ const ChatBox = (props) => {
         const size = formatFileSize(e.target.files[0].size)
         const type = e.target.files[0].type
         setFileUploads([...fileUploads, { filename, size, type }])
-        scrollMarker.current.scrollIntoView({ behavior: "smooth" })
         const storageRef = ref(
             storage,
             `files/${props.selectedChat.uid}/${filename}`
