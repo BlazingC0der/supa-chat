@@ -70,9 +70,12 @@ const ChatList = (props) => {
                                 id: doc.id,
                                 ...doc.data()
                             }))
-                            newLatestMsgs[i] = latestMsg[0]?.text
-                                ? latestMsg[0]?.text
-                                : latestMsg[0]?.filename
+                            newLatestMsgs[i] = {
+                                text: latestMsg[0]?.text
+                                    ? latestMsg[0]?.text
+                                    : latestMsg[0]?.filename,
+                                sentTime: timeElapsed(latestMsg[0]?.createdAt)
+                            }
                             if (
                                 !searchMode &&
                                 latestMsg[0] &&
@@ -112,6 +115,7 @@ const ChatList = (props) => {
                                     initRender.current = false
                                 }
                             }
+                            console.log("nlmsgs", newLatestMsgs)
                             return newLatestMsgs
                         })
                     })
@@ -284,6 +288,32 @@ const ChatList = (props) => {
         })
     }
 
+    const timeElapsed = (timestamp) => {
+        // Convert the given timestamp to a Date object
+        const date = new Date(
+            timestamp?.seconds * 1000 + timestamp?.nanoseconds / 1000000
+        )
+        // Get the current time
+        const now = new Date()
+        // Calculate the difference in milliseconds
+        const diffMs = now - date
+        // Convert milliseconds to a more readable format
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+        const diffHours = Math.floor(
+            (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        )
+        const diffMinutes = Math.floor(
+            (diffMs % (1000 * 60 * 60)) / (1000 * 60)
+        )
+        const diffSeconds = Math.floor((diffMs % (1000 * 60)) / 1000)
+        return {
+            days: diffDays,
+            hours: diffHours,
+            minutes: diffMinutes,
+            seconds: diffSeconds
+        }
+    }
+
     return (
         <>
             <section
@@ -391,15 +421,40 @@ const ChatList = (props) => {
                                             {chat.name}
                                         </h4>
                                         <span className="latest-msg">
-                                            {decryptMessage(latestMsgs[i])}
+                                            {decryptMessage(
+                                                latestMsgs[i]?.text
+                                            )}
                                         </span>
                                     </div>
-                                    {Number(localStorage.getItem(chat.uid)) >
-                                        0 && (
-                                        <div className="unseen-msgs">
-                                            {localStorage.getItem(chat.uid)}
-                                        </div>
-                                    )}
+                                    <div className="chat-notifiers">
+                                        <span
+                                            style={{
+                                                color: "grey",
+                                                fontSize: "12px"
+                                            }}
+                                        >
+                                            {latestMsgs[i]?.sentTime.days > 0
+                                                ? latestMsgs[i]?.sentTime.days +
+                                                  "d"
+                                                : latestMsgs[i]?.sentTime
+                                                      .hours > 0
+                                                ? latestMsgs[i]?.sentTime
+                                                      .hours + "h"
+                                                : latestMsgs[i]?.sentTime
+                                                      .minutes > 0
+                                                ? latestMsgs[i]?.sentTime +
+                                                  "m".minutes
+                                                : latestMsgs[i]?.sentTime
+                                                      .seconds + "s"}
+                                        </span>
+                                        {Number(
+                                            localStorage.getItem(chat.uid)
+                                        ) > 0 && (
+                                            <span className="unseen-msgs">
+                                                {localStorage.getItem(chat.uid)}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ) : null
