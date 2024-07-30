@@ -68,6 +68,7 @@
 
 .file-link {
     background-color: transparent !important;
+    padding: 0 !important;
 }
 
 .msg-visual {

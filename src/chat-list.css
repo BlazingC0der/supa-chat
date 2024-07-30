@@ -31,8 +31,21 @@
 .user-chat {
     min-height: 80%;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
     width: 65%;
+}
+
+.unseen-msgs {
+    width: 15px;
+    height: 15px;
+    background-color: red;
+    border-radius: 50%;
+    font-size: 10px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .latest-msg,
@@ -95,6 +108,14 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.chat-basic-info {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    height: 100%;
+    width: 70%;
 }
 
 .MuiCircularProgress-circle {

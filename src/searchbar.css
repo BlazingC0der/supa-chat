@@ -5,6 +5,7 @@
     border: none;
     outline: none;
     padding-left: 25px;
+    order: -1;
 }
 
 .user-search {

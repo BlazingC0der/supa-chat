@@ -14,8 +14,12 @@ const FileList = (props) => {
                     <div className="file-chip" key={file.id}>
                         <div className="file-data">
                             <div className="file-icon-wrapper">
-                                <span class="material-symbols-outlined">
-                                    {`${file.type.includes("image") ? "image" : "description"}`}
+                                <span className="material-symbols-outlined">
+                                    {`${
+                                        file.type.includes("image")
+                                            ? "image"
+                                            : "description"
+                                    }`}
                                 </span>
                             </div>
                             <div style={{ width: "100%" }}>
