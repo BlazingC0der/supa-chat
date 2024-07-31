@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     height: 100%;
-    width: 90%;
+    width: 100%;
     overflow-y: scroll;
     row-gap: 20px;
 }
@@ -23,13 +23,12 @@
     cursor: pointer;
 }
 
-.file-chip{
+.file-chip {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
+    width: 90%;
 }
-
 .file-icon-wrapper{
     height: fit-content;
     width: fit-content;

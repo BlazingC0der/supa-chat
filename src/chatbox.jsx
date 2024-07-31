@@ -34,7 +34,7 @@ const ChatBox = (props) => {
         if (messagesRef) {
             const messageQuery = query(
                 messagesRef,
-                orderBy("createdAt"),
+                orderBy("createdAt","desc"),
                 limit(25)
             )
             const unsubscribe = onSnapshot(messageQuery, (querySnapshot) => {
@@ -48,7 +48,7 @@ const ChatBox = (props) => {
                         id: doc.id,
                         ...msgData
                     }
-                })
+                }).reverse()
                 setFiles([...tempFiles])
                 console.log("new msgs", newMessages)
                 setMessages([...newMessages])
