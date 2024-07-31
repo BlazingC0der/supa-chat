@@ -427,26 +427,32 @@ const ChatList = (props) => {
                                         </span>
                                     </div>
                                     <div className="chat-notifiers">
-                                        <span
-                                            style={{
-                                                color: "grey",
-                                                fontSize: "12px"
-                                            }}
-                                        >
-                                            {latestMsgs[i]?.sentTime.days > 0
-                                                ? latestMsgs[i]?.sentTime.days +
-                                                  "d"
-                                                : latestMsgs[i]?.sentTime
-                                                      .hours > 0
-                                                ? latestMsgs[i]?.sentTime
-                                                      .hours + "h"
-                                                : latestMsgs[i]?.sentTime
-                                                      .minutes > 0
-                                                ? latestMsgs[i]?.sentTime +
-                                                  "m".minutes
-                                                : latestMsgs[i]?.sentTime
-                                                      .seconds + "s"}
-                                        </span>
+                                        {latestMsgs[i]?.text && (
+                                            <span
+                                                style={{
+                                                    color: "grey",
+                                                    fontSize: "12px"
+                                                }}
+                                            >
+                                                {latestMsgs[i]?.sentTime.days >
+                                                0
+                                                    ? latestMsgs[i]?.sentTime
+                                                          .days + "d"
+                                                    : latestMsgs[i]?.sentTime
+                                                          .hours > 0
+                                                    ? latestMsgs[i]?.sentTime
+                                                          .hours + "h"
+                                                    : latestMsgs[i]?.sentTime
+                                                          .minutes > 0
+                                                    ? latestMsgs[i]?.sentTime +
+                                                      "m".minutes
+                                                    : latestMsgs[i]?.sentTime
+                                                          .seconds > 0
+                                                    ? latestMsgs[i]?.sentTime
+                                                          .seconds + "s"
+                                                    : "just now"}
+                                            </span>
+                                        )}
                                         {Number(
                                             localStorage.getItem(chat.uid)
                                         ) > 0 && (
