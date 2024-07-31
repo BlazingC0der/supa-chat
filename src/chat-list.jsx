@@ -33,11 +33,13 @@ const ChatList = (props) => {
             : chats.map((user) => {
                   const [uid, otherUserUid] = [
                       sessionStorage.getItem("uid"),
-                      user.uid
+                      user?.uid
                   ]
                   const uids = [uid, otherUserUid].sort()
                   const chatUid =
-                      user.type === "group" ? user.uid : sha1(uids[0] + uids[1])
+                      user?.type === "group"
+                          ? user?.uid
+                          : sha1(uids[0] + uids[1])
                   chatIds.current.push(chatUid)
                   return collection(props.firestore, chatUid)
               })
@@ -115,7 +117,6 @@ const ChatList = (props) => {
                                     initRender.current = false
                                 }
                             }
-                            console.log("nlmsgs", newLatestMsgs)
                             return newLatestMsgs
                         })
                     })
@@ -180,7 +181,7 @@ const ChatList = (props) => {
                                 return userData
                             }
                         } catch (err) {
-                            console.error(err)
+                            console.error("chat fetch err",err)
                             return null
                         }
                     })
@@ -444,8 +445,8 @@ const ChatList = (props) => {
                                                           .hours + "h"
                                                     : latestMsgs[i]?.sentTime
                                                           .minutes > 0
-                                                    ? latestMsgs[i]?.sentTime +
-                                                      "m".minutes
+                                                    ? latestMsgs[i]?.sentTime
+                                                          .minutes + "m"
                                                     : latestMsgs[i]?.sentTime
                                                           .seconds > 0
                                                     ? latestMsgs[i]?.sentTime

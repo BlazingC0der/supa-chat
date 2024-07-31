@@ -11,6 +11,7 @@
 .chat-item {
     height: 15%;
     width: 95%;
+    max-height: 50px;
     display: flex;
     align-items: center;
     justify-content: start;

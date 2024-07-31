@@ -14,7 +14,8 @@ const Searchbar = (props) => {
                 )
                 !res.data
                     ? props.setSearchedChats([])
-                    : props.setSearchedChats(
+                    : e.target.value.length &&
+                      props.setSearchedChats(
                           res.data.map((chat) => {
                               return {
                                   name: chat.name,
