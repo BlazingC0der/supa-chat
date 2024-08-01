@@ -8,7 +8,8 @@ import {
     limit,
     onSnapshot,
     getDoc,
-    doc
+    doc,
+    setDoc
 } from "firebase/firestore"
 import Searchbar from "./searchbar"
 import { decryptMessage } from "./utils/decrypt"
@@ -20,6 +21,7 @@ const ChatList = (props) => {
     const [chats, setChats] = useState([])
     const [latestMsgs, setLatestMsgs] = useState([])
     const [searchMode, setSearchMode] = useState(false)
+    const [unreadMsgCounts, setUnreadMsgCounts] = useState([])
     const initRender = useRef(true)
     const chatIds = useRef([])
     const selectedChatId = useRef("")
@@ -59,71 +61,90 @@ const ChatList = (props) => {
     useEffect(() => {
         if (!props.users) {
             if (msgRefs.length) {
-                const unsubscribers = msgRefs.map((ref, i) => {
+                const msgUnsubscribers = msgRefs.map((ref, i) => {
                     const messageQuery = query(
                         ref,
                         orderBy("createdAt", "desc"),
                         limit(1)
                     )
                     return onSnapshot(messageQuery, (querySnapshot) => {
-                        setLatestMsgs((prevLatestMsgs) => {
-                            const newLatestMsgs = [...prevLatestMsgs]
-                            const latestMsg = querySnapshot.docs.map((doc) => ({
-                                id: doc.id,
-                                ...doc.data()
-                            }))
-                            newLatestMsgs[i] = {
-                                text: latestMsg[0]?.text
-                                    ? latestMsg[0]?.text
-                                    : latestMsg[0]?.filename,
-                                sentTime: timeElapsed(latestMsg[0]?.createdAt)
-                            }
-                            if (
-                                !searchMode &&
-                                latestMsg[0] &&
-                                latestMsg[0]?.uid !==
-                                    sessionStorage.getItem("uid")
-                            ) {
-                                if (
-                                    prevLatestMsgs.length >=
-                                        msgRefs.length - 1 &&
-                                    !initRender.current
-                                ) {
-                                    new Notification(
-                                        `${chats[i].name} sent a message`,
-                                        {
-                                            body: decryptMessage(
-                                                latestMsg[0]?.text ||
-                                                    latestMsg[0]?.filename
-                                            ),
-                                            icon: chats[i].photoURL
-                                        }
+                        try {
+                            setLatestMsgs((prevLatestMsgs) => {
+                                const newLatestMsgs = [...prevLatestMsgs]
+                                const latestMsg = querySnapshot.docs.map(
+                                    (doc) => ({
+                                        id: doc.id,
+                                        ...doc.data()
+                                    })
+                                )
+                                newLatestMsgs[i] = {
+                                    text: latestMsg[0]?.text
+                                        ? latestMsg[0]?.text
+                                        : latestMsg[0]?.filename,
+                                    sentTime: timeElapsed(
+                                        latestMsg[0]?.createdAt
                                     )
-                                    if (
-                                        selectedChatId.current !==
-                                        chatIds.current[i]
-                                    ) {
-                                        const unseenMsgs = localStorage.getItem(
-                                            chats[i].uid
-                                        )
-                                        localStorage.setItem(
-                                            chats[i].uid,
-                                            unseenMsgs
-                                                ? parseInt(unseenMsgs) + 1
-                                                : 1
-                                        )
-                                    }
-                                } else {
-                                    initRender.current = false
                                 }
-                            }
-                            return newLatestMsgs
-                        })
+                                if (
+                                    !searchMode &&
+                                    latestMsg[0] &&
+                                    latestMsg[0]?.uid !==
+                                        sessionStorage.getItem("uid")
+                                ) {
+                                    if (
+                                        prevLatestMsgs.length >=
+                                            msgRefs.length - 1 &&
+                                        !initRender.current
+                                    ) {
+                                        new Notification(
+                                            `${chats[i].name} sent a message`,
+                                            {
+                                                body: decryptMessage(
+                                                    latestMsg[0]?.text ||
+                                                        latestMsg[0]?.filename
+                                                ),
+                                                icon: chats[i].photoURL
+                                            }
+                                        )
+                                    } else {
+                                        initRender.current = false
+                                    }
+                                }
+                                return newLatestMsgs
+                            })
+                        } catch (error) {
+                            console.error(error)
+                        }
+                    })
+                })
+                const unreadUnsubscribers = msgRefs.map((ref, i) => {
+                    const unreadQuery = query(ref, orderBy("userData"))
+                    return onSnapshot(unreadQuery, (querySnapshot) => {
+                        try {
+                            setUnreadMsgCounts((prevUnreadMsgCounts) => {
+                                const newUnreadMsgsCounts = [
+                                    ...prevUnreadMsgCounts
+                                ]
+                                const unreadMsgsCount = querySnapshot.docs
+                                    .map((doc) => ({
+                                        id: doc.id,
+                                        ...doc.data()
+                                    }))[0]
+                                    .userData.filter(
+                                        (user) => user.uid === props.user.uid
+                                    )[0].unread
+                                newUnreadMsgsCounts[i] = unreadMsgsCount
+                                return [...newUnreadMsgsCounts]
+                            })
+                        } catch (error) {
+                            console.error(error)
+                        }
                     })
                 })
                 // Clean up the onSnapshot listeners on unmount
                 return () => {
-                    unsubscribers.forEach((unsubscribe) => unsubscribe())
+                    msgUnsubscribers.forEach((unsubscribe) => unsubscribe())
+                    unreadUnsubscribers.forEach((unsubscribe) => unsubscribe())
                 }
             }
         }
@@ -181,7 +202,7 @@ const ChatList = (props) => {
                                 return userData
                             }
                         } catch (err) {
-                            console.error("chat fetch err",err)
+                            console.error("chat fetch err", err)
                             return null
                         }
                     })
@@ -206,7 +227,10 @@ const ChatList = (props) => {
         }
     }, [props.user])
 
-    const showChat = (e, conversation) => {
+    const showChat = async (e, conversation) => {
+        let chatColRef
+        let participantsDocRef
+        let participantsData
         if (window.innerWidth <= 850) {
             document.querySelector(".chat-list").style.display = "none"
             document.querySelector(".chat-box").style.display = "flex"
@@ -214,7 +238,6 @@ const ChatList = (props) => {
             document.querySelector(".chat-info").style.display = "flex"
             document.querySelector(".msg-menu-controls").style.display = "none"
         }
-        localStorage.setItem(conversation.uid, 0)
         selectedChat.current &&
             (selectedChat.current.style.backgroundColor = "transparent")
         e.currentTarget.style.backgroundColor = "#f6f6fe"
@@ -265,6 +288,22 @@ const ChatList = (props) => {
                 "other-user-displayNames",
                 JSON.stringify(conversation.displayNames)
             )
+        }
+        try {
+            chatColRef = collection(props.firestore, selectedChatId.current)
+            participantsDocRef = doc(chatColRef, "participants")
+            participantsData = (await getDoc(participantsDocRef)).data()
+                .userData
+            participantsData.forEach((participant) => {
+                if (participant.uid === props.user.uid) {
+                    participant.unread = 0
+                }
+            })
+            await setDoc(participantsDocRef, {
+                userData: [...participantsData]
+            })
+        } catch (error) {
+            console.error(error)
         }
     }
 
@@ -454,11 +493,9 @@ const ChatList = (props) => {
                                                     : "just now"}
                                             </span>
                                         )}
-                                        {Number(
-                                            localStorage.getItem(chat.uid)
-                                        ) > 0 && (
+                                        {unreadMsgCounts[i] > 0 && (
                                             <span className="unseen-msgs">
-                                                {localStorage.getItem(chat.uid)}
+                                                {unreadMsgCounts[i]}
                                             </span>
                                         )}
                                     </div>
