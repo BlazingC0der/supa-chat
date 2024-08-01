@@ -1,9 +1,6 @@
 import "./msg.css"
 import doc from "./assets/doc.jpg"
-import {
-    CircularProgress,
-    styled
-} from "@mui/material"
+import { CircularProgress, styled } from "@mui/material"
 
 const ChatMessage = (props) => {
     const messageClass =
@@ -23,6 +20,8 @@ const ChatMessage = (props) => {
             sessionStorage.getItem("other-user-displayNames")
         )
         groupMembersUids = JSON.parse(sessionStorage.getItem("other-user-uids"))
+    }
+    if (props.showProfileImg) {
         otherUserProfileImg = props.groupChat
             ? groupMembersProfileImgs[groupMembersUids.indexOf(props.uid)]
             : sessionStorage.getItem("other-user-photoURL")

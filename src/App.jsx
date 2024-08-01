@@ -9,7 +9,8 @@ import {
     collection,
     doc,
     setDoc,
-    arrayUnion
+    arrayUnion,
+    getDoc
 } from "firebase/firestore"
 import axios from "axios"
 import ChatBox from "./chatbox"
@@ -120,6 +121,8 @@ function App() {
             const dirDocRefSelf = doc(dirColRef, uid)
             const chatColRef = collection(firestore, selectedChat.uid)
             const participantsDocRef = doc(chatColRef, "participants")
+            const participantsData = (await getDoc(participantsDocRef)).data()
+                .userData
             // adding msg doc
             textFlag
                 ? await addDoc(chatColRef, {
@@ -143,6 +146,12 @@ function App() {
                   })
             if (!groupMsg) {
                 const dirDocRefOtherUser = doc(dirColRef, otherUserUid)
+                const otherUserUndreadMsgs = participantsData.filter(
+                    (participant) => participant.uid === otherUserUid
+                )[0].unread
+                const selfUndreadMsgs = participantsData.filter(
+                    (participant) => participant.uid === uid
+                )[0].unread
                 await setDoc(
                     participantsDocRef,
                     {
@@ -150,7 +159,8 @@ function App() {
                             {
                                 uid: uid,
                                 name: sessionStorage.getItem("displayName"),
-                                photoURL: sessionStorage.getItem("photoURL")
+                                photoURL: sessionStorage.getItem("photoURL"),
+                                unread: selfUndreadMsgs ?? 0
                             },
                             {
                                 uid: otherUserUid,
@@ -159,11 +169,14 @@ function App() {
                                 ),
                                 photoURL: sessionStorage.getItem(
                                     "other-user-photoURL"
-                                )
+                                ),
+                                unread:
+                                    otherUserUndreadMsgs >= 0
+                                        ? otherUserUndreadMsgs + 1
+                                        : 1
                             }
                         )
-                    },
-                    { merge: true }
+                    }
                 )
                 await setDoc(
                     dirDocRefSelf,
@@ -178,6 +191,35 @@ function App() {
                         chats: arrayUnion(sha1(uids[0] + uids[1]))
                     },
                     { merge: true }
+                )
+            } else {
+                const otherUsers = participantsData.filter(
+                    (participant) => participant.uid !== uid
+                )
+                const selfUndreadMsgs = participantsData.filter(
+                    (participant) => participant.uid === uid
+                )[0].unread
+                await setDoc(
+                    participantsDocRef,
+                    {
+                        userData: arrayUnion(
+                            {
+                                uid: uid,
+                                name: sessionStorage.getItem("displayName"),
+                                photoURL: sessionStorage.getItem("photoURL"),
+                                unread: selfUndreadMsgs ?? 0
+                            },
+                            ...otherUsers.map((user) => {
+                                return {
+                                    uid: user.uid,
+                                    name: user.name,
+                                    photoURL: user.photoURL,
+                                    unread:
+                                        user.unread >= 0 ? user.unread + 1 : 1
+                                }
+                            })
+                        )
+                    }
                 )
             }
         } catch (error) {
