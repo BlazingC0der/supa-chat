@@ -133,7 +133,17 @@ const ChatList = (props) => {
                                     .userData.filter(
                                         (user) => user.uid === props.user.uid
                                     )[0].unread
-                                newUnreadMsgsCounts[i] = unreadMsgsCount
+                                if (
+                                    ref._path.segments[0] ===
+                                    selectedChatId.current
+                                ) {
+                                    if (unreadMsgsCount) {
+                                        resetUnreadMsgsCount()
+                                    }
+                                    newUnreadMsgsCounts[i] = 0
+                                } else {
+                                    newUnreadMsgsCounts[i] = unreadMsgsCount
+                                }
                                 return [...newUnreadMsgsCounts]
                             })
                         } catch (error) {
@@ -228,9 +238,6 @@ const ChatList = (props) => {
     }, [props.user])
 
     const showChat = async (e, conversation) => {
-        let chatColRef
-        let participantsDocRef
-        let participantsData
         if (window.innerWidth <= 850) {
             document.querySelector(".chat-list").style.display = "none"
             document.querySelector(".chat-box").style.display = "flex"
@@ -289,10 +296,17 @@ const ChatList = (props) => {
                 JSON.stringify(conversation.displayNames)
             )
         }
+        await resetUnreadMsgsCount()
+    }
+
+    const resetUnreadMsgsCount = async () => {
         try {
-            chatColRef = collection(props.firestore, selectedChatId.current)
-            participantsDocRef = doc(chatColRef, "participants")
-            participantsData = (await getDoc(participantsDocRef)).data()
+            const chatColRef = collection(
+                props.firestore,
+                selectedChatId.current
+            )
+            const participantsDocRef = doc(chatColRef, "participants")
+            const participantsData = (await getDoc(participantsDocRef)).data()
                 .userData
             participantsData.forEach((participant) => {
                 if (participant.uid === props.user.uid) {
