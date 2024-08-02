@@ -121,8 +121,8 @@ function App() {
             const dirDocRefSelf = doc(dirColRef, uid)
             const chatColRef = collection(firestore, selectedChat.uid)
             const participantsDocRef = doc(chatColRef, "participants")
-            const participantsData = (await getDoc(participantsDocRef)).data()
-                .userData
+            const participantsData =
+                (await getDoc(participantsDocRef)).data()?.userData ?? []
             // adding msg doc
             textFlag
                 ? await addDoc(chatColRef, {
@@ -148,36 +148,33 @@ function App() {
                 const dirDocRefOtherUser = doc(dirColRef, otherUserUid)
                 const otherUserUndreadMsgs = participantsData.filter(
                     (participant) => participant.uid === otherUserUid
-                )[0].unread
+                )[0]?.unread
                 const selfUndreadMsgs = participantsData.filter(
                     (participant) => participant.uid === uid
-                )[0].unread
-                await setDoc(
-                    participantsDocRef,
-                    {
-                        userData: arrayUnion(
-                            {
-                                uid: uid,
-                                name: sessionStorage.getItem("displayName"),
-                                photoURL: sessionStorage.getItem("photoURL"),
-                                unread: selfUndreadMsgs ?? 0
-                            },
-                            {
-                                uid: otherUserUid,
-                                name: sessionStorage.getItem(
-                                    "other-user-displayName"
-                                ),
-                                photoURL: sessionStorage.getItem(
-                                    "other-user-photoURL"
-                                ),
-                                unread:
-                                    otherUserUndreadMsgs >= 0
-                                        ? otherUserUndreadMsgs + 1
-                                        : 1
-                            }
-                        )
-                    }
-                )
+                )[0]?.unread
+                await setDoc(participantsDocRef, {
+                    userData: arrayUnion(
+                        {
+                            uid: uid,
+                            name: sessionStorage.getItem("displayName"),
+                            photoURL: sessionStorage.getItem("photoURL"),
+                            unread: selfUndreadMsgs ?? 0
+                        },
+                        {
+                            uid: otherUserUid,
+                            name: sessionStorage.getItem(
+                                "other-user-displayName"
+                            ),
+                            photoURL: sessionStorage.getItem(
+                                "other-user-photoURL"
+                            ),
+                            unread:
+                                otherUserUndreadMsgs >= 0
+                                    ? otherUserUndreadMsgs + 1
+                                    : 1
+                        }
+                    )
+                })
                 await setDoc(
                     dirDocRefSelf,
                     {
@@ -199,28 +196,24 @@ function App() {
                 const selfUndreadMsgs = participantsData.filter(
                     (participant) => participant.uid === uid
                 )[0].unread
-                await setDoc(
-                    participantsDocRef,
-                    {
-                        userData: arrayUnion(
-                            {
-                                uid: uid,
-                                name: sessionStorage.getItem("displayName"),
-                                photoURL: sessionStorage.getItem("photoURL"),
-                                unread: selfUndreadMsgs ?? 0
-                            },
-                            ...otherUsers.map((user) => {
-                                return {
-                                    uid: user.uid,
-                                    name: user.name,
-                                    photoURL: user.photoURL,
-                                    unread:
-                                        user.unread >= 0 ? user.unread + 1 : 1
-                                }
-                            })
-                        )
-                    }
-                )
+                await setDoc(participantsDocRef, {
+                    userData: arrayUnion(
+                        {
+                            uid: uid,
+                            name: sessionStorage.getItem("displayName"),
+                            photoURL: sessionStorage.getItem("photoURL"),
+                            unread: selfUndreadMsgs ?? 0
+                        },
+                        ...otherUsers.map((user) => {
+                            return {
+                                uid: user.uid,
+                                name: user.name,
+                                photoURL: user.photoURL,
+                                unread: user.unread >= 0 ? user.unread + 1 : 1
+                            }
+                        })
+                    )
+                })
             }
         } catch (error) {
             console.error("Error writing document: ", error)

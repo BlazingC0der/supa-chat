@@ -5,7 +5,9 @@ import {
     query,
     orderBy,
     limit,
-    onSnapshot
+    getDocs,
+    onSnapshot,
+    startAfter
 } from "firebase/firestore"
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import "./chatbox.css"
@@ -19,7 +21,10 @@ const ChatBox = (props) => {
     const [formValue, setFormValue] = useState("")
     const [files, setFiles] = useState([])
     const [fileUploads, setFileUploads] = useState([])
+    const [lastVisible, setLastVisible] = useState(null)
+    const [loadingOlderMessages, setLoadingOlderMessages] = useState(false)
     const scrollMarker = useRef()
+    const scrollToBottomFlag = useRef(true)
     const fileInput = useRef()
 
     const messagesRef = useMemo(() => {
@@ -34,32 +39,39 @@ const ChatBox = (props) => {
         if (messagesRef) {
             const messageQuery = query(
                 messagesRef,
-                orderBy("createdAt","desc"),
+                orderBy("createdAt", "desc"),
                 limit(25)
             )
             const unsubscribe = onSnapshot(messageQuery, (querySnapshot) => {
                 const tempFiles = [...files]
-                const newMessages = querySnapshot.docs.map((doc) => {
-                    const msgData = doc.data()
-                    if (msgData.file) {
-                        tempFiles.unshift({ id: doc.id, ...msgData })
-                    }
-                    return {
-                        id: doc.id,
-                        ...msgData
-                    }
-                }).reverse()
+                const newMessages = querySnapshot.docs
+                    .map((doc) => {
+                        const msgData = doc.data()
+                        if (msgData.file) {
+                            tempFiles.unshift({ id: doc.id, ...msgData })
+                        }
+                        return {
+                            id: doc.id,
+                            ...msgData
+                        }
+                    })
+                    .reverse()
                 setFiles([...tempFiles])
                 console.log("new msgs", newMessages)
                 setMessages([...newMessages])
+                setLastVisible(
+                    querySnapshot.docs[querySnapshot.docs.length - 1]
+                )
             })
             return unsubscribe
         }
     }, [messagesRef])
 
     useEffect(() => {
-        scrollMarker.current.scrollIntoView({ behavior: "smooth" })
-    }, [messages,fileUploads])
+        scrollToBottomFlag.current
+            ? scrollMarker.current.scrollIntoView({ behavior: "smooth" })
+            : (scrollToBottomFlag.current = true)
+    }, [messages, fileUploads])
 
     const sendMessage = async (e) => {
         e.preventDefault()
@@ -119,10 +131,57 @@ const ChatBox = (props) => {
             })
     }
 
+    const fetchOlderMessages = async () => {
+        if (!messagesRef || loadingOlderMessages) return
+        setLoadingOlderMessages(true)
+        try {
+            const olderMessagesQuery = query(
+                messagesRef,
+                orderBy("createdAt", "desc"),
+                startAfter(lastVisible), // Get messages older than the last visible one
+                limit(25)
+            )
+            const querySnapshot = await getDocs(olderMessagesQuery)
+            if (!querySnapshot.empty) {
+                const tempFiles = [...files]
+                const olderMessages = querySnapshot.docs
+                    .map((doc) => {
+                        const msgData = doc.data()
+                        if (msgData.file) {
+                            tempFiles.unshift({ id: doc.id, ...msgData })
+                        }
+                        return { id: doc.id, ...msgData }
+                    })
+                    .reverse()
+                console.log(
+                    "older msgs",
+                    olderMessages.map((msg) => decryptMessage(msg.text)),
+                    decryptMessage(lastVisible.data().text)
+                )
+                setFiles([...tempFiles, ...files])
+                setMessages([...olderMessages, ...messages])
+                scrollToBottomFlag.current = false
+                setLastVisible(
+                    querySnapshot.docs[querySnapshot.docs.length - 1]
+                )
+            }
+        } catch (error) {
+            console.error("Error fetching older messages:", error)
+        } finally {
+            setLoadingOlderMessages(false)
+        }
+    }
+
+    const handleScroll = (e) => {
+        if (e.target.scrollTop === 0 && !loadingOlderMessages) {
+            fetchOlderMessages()
+        }
+    }
+
     return (
         <main className="chat-box">
             <div className="chat-area">
-                <div className="msgs">
+                <div className="msgs" onScroll={handleScroll}>
                     {props.selectedChat &&
                         messages.map((msg, i) =>
                             i > 0 && messages[i - 1].uid !== msg.uid ? (

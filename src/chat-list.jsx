@@ -128,9 +128,9 @@ const ChatList = (props) => {
                                 const unreadMsgsCount = querySnapshot.docs
                                     .map((doc) => ({
                                         id: doc.id,
-                                        ...doc.data()
+                                        ...doc?.data()
                                     }))[0]
-                                    .userData.filter(
+                                    ?.userData?.filter(
                                         (user) => user.uid === props.user.uid
                                     )[0].unread
                                 if (
@@ -300,24 +300,26 @@ const ChatList = (props) => {
     }
 
     const resetUnreadMsgsCount = async () => {
-        try {
-            const chatColRef = collection(
-                props.firestore,
-                selectedChatId.current
-            )
-            const participantsDocRef = doc(chatColRef, "participants")
-            const participantsData = (await getDoc(participantsDocRef)).data()
-                .userData
-            participantsData.forEach((participant) => {
-                if (participant.uid === props.user.uid) {
-                    participant.unread = 0
-                }
-            })
-            await setDoc(participantsDocRef, {
-                userData: [...participantsData]
-            })
-        } catch (error) {
-            console.error(error)
+        if (!searchMode) {
+            try {
+                const chatColRef = collection(
+                    props.firestore,
+                    selectedChatId.current
+                )
+                const participantsDocRef = doc(chatColRef, "participants")
+                const participantsData = (await getDoc(participantsDocRef)).data()
+                    ?.userData
+                participantsData?.forEach((participant) => {
+                    if (participant.uid === props.user.uid) {
+                        participant.unread = 0
+                    }
+                })
+                await setDoc(participantsDocRef, {
+                    userData: [...participantsData]
+                })
+            } catch (error) {
+                console.error(error)
+            }
         }
     }
 
