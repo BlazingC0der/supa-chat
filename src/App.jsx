@@ -17,7 +17,7 @@ import ChatBox from "./chatbox"
 import ChatList from "./chat-list"
 import CryptoJS from "crypto-js"
 import sha1 from "sha1"
-import GroupModal from "./group-creation-modal"
+import ChatModal from "./chat-modal"
 import ChatHeader from "./chat-header"
 
 const firebaseConfig = {
@@ -40,7 +40,8 @@ const firestore = getFirestore()
 function App() {
     const [user, setUser] = useState(null)
     const [selectedChat, setSelectedChat] = useState(null)
-    const [openGroupModal, setOpenGroupModal] = useState(false)
+    const [openChatModal, setOpenChatModal] = useState(false)
+    const [chatModalMode, setChatModalMode] = useState("")
     const username = useRef("")
     const password = useRef("")
     const authTkn = useRef("")
@@ -272,16 +273,21 @@ function App() {
 
     return (
         <div className="App">
-            <GroupModal
-                openModal={setOpenGroupModal}
-                open={openGroupModal}
+            <ChatModal
+                openModal={setOpenChatModal}
+                open={openChatModal}
                 firestore={firestore}
                 createGroup={createGroup}
+                newChat={chatModalMode === "newChat"}
+                selectChat={setSelectedChat}
             />
             {user && (
                 <ChatHeader
                     signOut={logOut}
-                    openGroupModal={() => setOpenGroupModal(true)}
+                    openChatModal={(mode) => {
+                        setOpenChatModal(true)
+                        setChatModalMode(mode)
+                    }}
                     chatName={selectedChat?.name}
                     chatImg={selectedChat?.avatar}
                 />

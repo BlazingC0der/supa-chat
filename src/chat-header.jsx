@@ -50,7 +50,10 @@ const ChatHeader = (props) => {
                         <div className="msg-menu">
                             <div
                                 className="chat-option"
-                                onClick={() => setShowMsgMenu(false)}
+                                onClick={() => {
+                                    props.openChatModal("newChat")
+                                    setShowMsgMenu(false)
+                                }}
                             >
                                 <span className="material-symbols-outlined">
                                     person_add
@@ -60,7 +63,7 @@ const ChatHeader = (props) => {
                             <div
                                 className="chat-option"
                                 onClick={() => {
-                                    props.openGroupModal()
+                                    props.openChatModal("newGroup")
                                     setShowMsgMenu(false)
                                 }}
                             >
@@ -121,7 +124,7 @@ const ChatHeader = (props) => {
                                 <div
                                     className="chat-option"
                                     onClick={() => {
-                                        props.openGroupModal()
+                                        props.openChatModal()
                                         setShowMsgMenu(false)
                                     }}
                                 >

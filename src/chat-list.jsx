@@ -296,6 +296,7 @@ const ChatList = (props) => {
                 JSON.stringify(conversation.displayNames)
             )
         }
+        props.users && !props.checkBoxSelection && props.closeModal()
         await resetUnreadMsgsCount()
     }
 
@@ -307,8 +308,9 @@ const ChatList = (props) => {
                     selectedChatId.current
                 )
                 const participantsDocRef = doc(chatColRef, "participants")
-                const participantsData = (await getDoc(participantsDocRef)).data()
-                    ?.userData
+                const participantsData = (
+                    await getDoc(participantsDocRef)
+                ).data()?.userData
                 participantsData?.forEach((participant) => {
                     if (participant.uid === props.user.uid) {
                         participant.unread = 0
@@ -404,9 +406,15 @@ const ChatList = (props) => {
                                 width: "100%",
                                 justifyContent: "space-between",
                                 paddingLeft: props.users ? "0px" : "5px",
-                                cursor: props.users ? "initial" : "pointer"
+                                cursor:
+                                    props.users && props.checkBoxSelection
+                                        ? "initial"
+                                        : "pointer"
                             }}
                             key={user.uid}
+                            onClick={(e) => {
+                                !props.checkBoxSelection && showChat(e, user)
+                            }}
                         >
                             <div className="user-info">
                                 <img
@@ -418,21 +426,26 @@ const ChatList = (props) => {
                                     <h4 style={{ margin: 0 }}>{user.name}</h4>
                                 </div>
                             </div>
-                            {props.selectionMode && (
-                                <div
-                                    className="custom-checkbox"
-                                    onClick={(e) => {
-                                        e.target.classList.toggle(
-                                            "custom-checkbox-clicked"
-                                        )
-                                        e.target.classList.contains(
-                                            "custom-checkbox-clicked"
-                                        )
-                                            ? addGroupMember(user)
-                                            : removeGroupMember(user)
-                                    }}
-                                />
-                            )}
+                            {props.selectionMode &&
+                                (props.checkBoxSelection ? (
+                                    <div
+                                        className="custom-checkbox"
+                                        onClick={(e) => {
+                                            e.target.classList.toggle(
+                                                "custom-checkbox-clicked"
+                                            )
+                                            e.target.classList.contains(
+                                                "custom-checkbox-clicked"
+                                            )
+                                                ? addGroupMember(user)
+                                                : removeGroupMember(user)
+                                        }}
+                                    />
+                                ) : (
+                                    <span className="material-symbols-outlined">
+                                        chevron_right
+                                    </span>
+                                ))}
                         </div>
                     ))
                 ) : !chats.length ? (

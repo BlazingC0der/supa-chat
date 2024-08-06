@@ -2,7 +2,7 @@ import { Box, Button, Modal, Typography, Container } from "@mui/material"
 import { styled } from "@mui/system"
 import Searchbar from "./searchbar"
 import { useRef, useState } from "react"
-import "./group-creation-modal.css"
+import "./chat-modal.css"
 import UserList from "./chat-list"
 
 const StyledModal = styled(Modal)({
@@ -33,7 +33,6 @@ const ModalSubheading = styled(Typography)({
 })
 
 const ScrollableContainer = styled(Container)({
-    maxHeight: "200px",
     overflowY: "auto",
     marginTop: "25px",
     padding: "0 !important"
@@ -47,11 +46,12 @@ const createBtnStyle = {
     textTransform: "initial"
 }
 
-const GroupModal = (props) => {
-    const handleClose = () => props.openModal(false)
+const ChatModal = (props) => {
     const [searchedUsers, setSearchedUsers] = useState([])
     const [groupMembers, setGroupMembers] = useState([])
     const groupName = useRef("")
+
+    const handleClose = () => props.openModal(false)
 
     const handleGroupCreation = () => {
         props.createGroup(groupMembers, groupName.current)
@@ -64,9 +64,13 @@ const GroupModal = (props) => {
         <div>
             <StyledModal open={props.open} onClose={handleClose}>
                 <ModalContent>
-                    <ModalHeading variant="h6">Create New Group</ModalHeading>
+                    <ModalHeading variant="h6">
+                        {props.newChat ? "Start New Chat" : "Create New Group"}
+                    </ModalHeading>
                     <ModalSubheading variant="subtitle1">
-                        Add users to create a new group
+                        {props.newChat
+                            ? "Select a user to start chatting with them"
+                            : "Add users to create a new group"}
                     </ModalSubheading>
                     <Box
                         sx={{
@@ -77,41 +81,52 @@ const GroupModal = (props) => {
                             rowGap: "10px"
                         }}
                     >
-                        <input
-                            type="text"
-                            className="group-name"
-                            name="group-name"
-                            id="group-name"
-                            placeholder="group name"
-                            onChange={(e) =>
-                                (groupName.current = e.target.value)
-                            }
-                        />
+                        {!props.newChat && (
+                            <input
+                                type="text"
+                                className="group-name"
+                                name="group-name"
+                                id="group-name"
+                                placeholder="group name"
+                                onChange={(e) =>
+                                    (groupName.current = e.target.value)
+                                }
+                            />
+                        )}
                         <Searchbar
                             setSearchedChats={setSearchedUsers}
                             width={"100%"}
                         />
                     </Box>
-                    <ScrollableContainer>
+                    <ScrollableContainer
+                        sx={{ maxHeight: props.newChat ? "280px" : "200px" }}
+                    >
                         <UserList
                             users={searchedUsers}
                             mutateMembers={setGroupMembers}
                             selectionMode
+                            checkBoxSelection={!props.newChat}
+                            selectChat={props.selectChat}
+                            closeModal={handleClose}
                         />
                     </ScrollableContainer>
-                    <Button
-                        fullWidth
-                        sx={createBtnStyle}
-                        variant="contained"
-                        onClick={handleGroupCreation}
-                        disabled={!groupMembers.length || !groupName.current}
-                    >
-                        Create Group
-                    </Button>
+                    {!props.newChat && (
+                        <Button
+                            fullWidth
+                            sx={createBtnStyle}
+                            variant="contained"
+                            onClick={handleGroupCreation}
+                            disabled={
+                                !groupMembers.length || !groupName.current
+                            }
+                        >
+                            Create Group
+                        </Button>
+                    )}
                 </ModalContent>
             </StyledModal>
         </div>
     )
 }
 
-export default GroupModal
+export default ChatModal
