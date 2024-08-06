@@ -102,8 +102,21 @@ const ChatBox = (props) => {
             storage,
             `files/${props.selectedChat.uid}/${filename}`
         )
+        const metadata = {
+            customMetadata: {
+                authorizedUsers: JSON.stringify(
+                    props.selectedChat.type === "user"
+                        ? [
+                              sessionStorage.getItem("uid"),
+                              sessionStorage.getItem("other-user-uid")
+                          ]
+                        : props.selectedChat.members.map((member) => member.uid)
+                )
+            }
+        }
         // 'file' comes from the Blob or File API
-        uploadBytes(storageRef, e.target.files[0])
+        console.log("meta",metadata);
+        uploadBytes(storageRef, e.target.files[0], metadata)
             .then((snapshot) => {
                 console.log("Uploaded a blob or file!", snapshot)
                 setFileUploads((files) => {

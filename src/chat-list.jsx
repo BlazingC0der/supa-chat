@@ -416,11 +416,6 @@ const ChatList = (props) => {
                                 />
                                 <div className="user-chat">
                                     <h4 style={{ margin: 0 }}>{user.name}</h4>
-                                    {props.selectionMode && (
-                                        <span className="user-name">
-                                            {`${user.fname} ${user.lname}`}
-                                        </span>
-                                    )}
                                 </div>
                             </div>
                             {props.selectionMode && (

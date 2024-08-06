@@ -221,9 +221,7 @@ function App() {
     }
 
     const createGroup = async (members, groupName) => {
-        console.log("members", members)
         const dirColRef = collection(firestore, "chat-directory")
-        console.log("members", members)
         const dirDocRefsGroupMembers = members.map((member) =>
             doc(dirColRef, member.uid.toString())
         )
