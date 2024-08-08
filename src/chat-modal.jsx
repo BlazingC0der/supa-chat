@@ -51,7 +51,10 @@ const ChatModal = (props) => {
     const [groupMembers, setGroupMembers] = useState([])
     const groupName = useRef("")
 
-    const handleClose = () => props.openModal(false)
+    const handleClose = () => {
+        setGroupMembers([])
+        props.openModal(false)
+    }
 
     const handleGroupCreation = () => {
         props.createGroup(groupMembers, groupName.current)
@@ -117,7 +120,7 @@ const ChatModal = (props) => {
                             variant="contained"
                             onClick={handleGroupCreation}
                             disabled={
-                                !groupMembers.length || !groupName.current
+                                groupMembers.length < 2 || !groupName.current
                             }
                         >
                             Create Group

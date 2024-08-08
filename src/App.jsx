@@ -21,13 +21,13 @@ import ChatModal from "./chat-modal"
 import ChatHeader from "./chat-header"
 
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: "chat-app-ca35e.firebaseapp.com",
-    projectId: "chat-app-ca35e",
-    storageBucket: "chat-app-ca35e.appspot.com",
-    messagingSenderId: "995366670804",
-    appId: "1:995366670804:web:b5t7c8355e838db6c548641",
-    measurementId: "G-HHZDGQK3Z1"
+    apiKey: "AIzaSyBDYMJ3uhdyjeQegQDZnXVV-mCV91vH5uM",
+    authDomain: "leapstartupearly-82067.firebaseapp.com",
+    projectId: "leapstartupearly-82067",
+    storageBucket: "leapstartupearly-82067.appspot.com",
+    messagingSenderId: "412283018548",
+    appId: "1:412283018548:web:c13264dbb01d23bce9d961",
+    measurementId: "G-QZM1HXBCR5"
 }
 
 export const authContext = createContext()
@@ -91,7 +91,7 @@ function App() {
                         )
                         setUser(user)
                     } catch (error) {
-                        console.error(error)
+                        console.error("Error signing in:", error)
                     }
                 })
                 .catch((error) => {

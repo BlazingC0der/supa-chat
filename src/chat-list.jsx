@@ -22,6 +22,7 @@ const ChatList = (props) => {
     const [latestMsgs, setLatestMsgs] = useState([])
     const [searchMode, setSearchMode] = useState(false)
     const [unreadMsgCounts, setUnreadMsgCounts] = useState([])
+    const [showLoader, setShowLoader] = useState(true)
     const initRender = useRef(true)
     const chatIds = useRef([])
     const selectedChatId = useRef("")
@@ -29,10 +30,11 @@ const ChatList = (props) => {
     const Loader = styled(CircularProgress)({ color: "rgb(0, 0, 128)" })
 
     const msgRefs = useMemo(() => {
+        setShowLoader(true)
         chatIds.current = []
         return props.users
             ? null
-            : chats.map((user) => {
+            : chats?.map((user) => {
                   const [uid, otherUserUid] = [
                       sessionStorage.getItem("uid"),
                       user?.uid
@@ -45,7 +47,7 @@ const ChatList = (props) => {
                   chatIds.current.push(chatUid)
                   return collection(props.firestore, chatUid)
               })
-    }, [chats.length])
+    }, [chats?.length])
 
     useEffect(() => {
         ;(async () => {
@@ -60,8 +62,8 @@ const ChatList = (props) => {
 
     useEffect(() => {
         if (!props.users) {
-            if (msgRefs.length) {
-                const msgUnsubscribers = msgRefs.map((ref, i) => {
+            if (msgRefs?.length) {
+                const msgUnsubscribers = msgRefs?.map((ref, i) => {
                     const messageQuery = query(
                         ref,
                         orderBy("createdAt", "desc"),
@@ -93,7 +95,7 @@ const ChatList = (props) => {
                                 ) {
                                     if (
                                         prevLatestMsgs.length >=
-                                            msgRefs.length - 1 &&
+                                            msgRefs?.length - 1 &&
                                         !initRender.current
                                     ) {
                                         new Notification(
@@ -117,7 +119,7 @@ const ChatList = (props) => {
                         }
                     })
                 })
-                const unreadUnsubscribers = msgRefs.map((ref, i) => {
+                const unreadUnsubscribers = msgRefs?.map((ref, i) => {
                     const unreadQuery = query(ref, orderBy("userData"))
                     return onSnapshot(unreadQuery, (querySnapshot) => {
                         try {
@@ -230,6 +232,8 @@ const ChatList = (props) => {
                 if (docSnap.exists()) {
                     const chatUids = docSnap.data().chats
                     fetchChatParticipants(chatUids)
+                } else {
+                    setShowLoader(false)
                 }
             })
             // Cleanup on unmount
@@ -388,7 +392,7 @@ const ChatList = (props) => {
                         : "15px",
                     minHeight: props.users && "165px",
                     justifyContent:
-                        props.users || chats.length ? "flex-start" : "center"
+                        props.users || chats?.length ? "flex-start" : "center"
                 }}
             >
                 {!props.users && (
@@ -448,16 +452,16 @@ const ChatList = (props) => {
                                 ))}
                         </div>
                     ))
-                ) : !chats.length ? (
+                ) : !chats?.length ? (
                     <div style={{ margin: "auto" }}>
                         {!searchMode ? (
-                            <Loader size={100} />
+                            showLoader && <Loader size={100} />
                         ) : (
                             <h3>No Users Found</h3>
                         )}
                     </div>
                 ) : (
-                    chats.map((chat, i) =>
+                    chats?.map((chat, i) =>
                         chat ? (
                             <div
                                 className="chat-item"
