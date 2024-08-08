@@ -164,18 +164,21 @@ const ChatList = (props) => {
 
     useEffect(() => {
         if (!props.users) {
-            const fetchChatParticipants = async (chatUids) => {
-                const tempUsers = await Promise.all(
-                    chatUids.map(async (uid) => {
+            const fetchChatParticipants = async (chats) => {
+                const tempChats = await Promise.all(
+                    chats.map(async (chat) => {
                         try {
-                            const chatRef = collection(props.firestore, uid)
+                            const chatRef = collection(
+                                props.firestore,
+                                chat.chatId
+                            )
                             const participantsSnap = await getDoc(
                                 doc(chatRef, "participants")
                             )
                             if (participantsSnap.exists()) {
                                 const participants =
                                     participantsSnap.data().userData
-                                let userData
+                                let chatData
                                 if (participants.length > 2) {
                                     const uids = participants.map(
                                         (participant) => participant.uid
@@ -190,28 +193,31 @@ const ChatList = (props) => {
                                         doc(chatRef, "groupData")
                                     )
                                     const groupData = groupDataDocRef.data()
-                                    userData = {
+                                    chatData = {
                                         type: "group",
-                                        uid,
+                                        uid: chat.chatId,
                                         photoURL: groupProfileImg,
                                         name: groupData.name,
                                         uids,
                                         displayNames,
-                                        photoURLs
+                                        photoURLs,
+                                        timestamp: chat.latestMsgTimestamp
                                     }
                                 } else {
                                     participants.forEach((participant) => {
                                         if (
                                             participant.uid !== props.user.uid
                                         ) {
-                                            userData = {
+                                            chatData = {
                                                 ...participant,
-                                                type: "user"
+                                                type: "user",
+                                                timestamp:
+                                                    chat.latestMsgTimestamp
                                             }
                                         }
                                     })
                                 }
-                                return userData
+                                return chatData
                             }
                         } catch (err) {
                             console.error("chat fetch err", err)
@@ -220,8 +226,13 @@ const ChatList = (props) => {
                     })
                 )
                 // Filtering out null responses due to errors
-                setChats([...tempUsers.filter((user) => user !== null)])
-                sessionStorage.setItem("chats", JSON.stringify(tempUsers))
+                setChats(
+                    [...tempChats.filter((user) => user !== null)].sort(
+                        (chat1, chat2) =>
+                            new Date(chat2.date) - new Date(chat1.date)
+                    )
+                )
+                sessionStorage.setItem("chats", JSON.stringify(tempChats))
             }
             // Reference to the chat-dir collection
             const colRef = collection(props.firestore, "chat-directory")
@@ -230,8 +241,8 @@ const ChatList = (props) => {
             // Listening for real-time updates
             const unsubscribe = onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
-                    const chatUids = docSnap.data().chats
-                    fetchChatParticipants(chatUids)
+                    const chatsData = docSnap.data().chats
+                    fetchChatParticipants(chatsData)
                 } else {
                     setShowLoader(false)
                 }

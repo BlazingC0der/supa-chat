@@ -120,6 +120,7 @@ function App() {
         try {
             const dirColRef = collection(firestore, "chat-directory")
             const dirDocRefSelf = doc(dirColRef, uid)
+            const dirDocDataSelf = (await getDoc(dirDocRefSelf)).data().chats
             const chatColRef = collection(firestore, selectedChat.uid)
             const participantsDocRef = doc(chatColRef, "participants")
             const participantsData =
@@ -147,6 +148,9 @@ function App() {
                   })
             if (!groupMsg) {
                 const dirDocRefOtherUser = doc(dirColRef, otherUserUid)
+                const dirDocDataOtherUser = (
+                    await getDoc(dirDocRefOtherUser)
+                ).data().chats
                 const otherUserUndreadMsgs = participantsData.filter(
                     (participant) => participant.uid === otherUserUid
                 )[0]?.unread
@@ -176,21 +180,52 @@ function App() {
                         }
                     )
                 })
-                await setDoc(
-                    dirDocRefSelf,
-                    {
-                        chats: arrayUnion(sha1(uids[0] + uids[1]))
-                    },
-                    { merge: true }
-                )
-                await setDoc(
-                    dirDocRefOtherUser,
-                    {
-                        chats: arrayUnion(sha1(uids[0] + uids[1]))
-                    },
-                    { merge: true }
-                )
+                await setDoc(dirDocRefSelf, {
+                    chats: [
+                        ...dirDocDataSelf,
+                        {
+                            chatId: sha1(uids[0] + uids[1]),
+                            latestMsgTimestamp: new Date()
+                        }
+                    ]
+                })
+                await setDoc(dirDocRefOtherUser, {
+                    chats: [
+                        ...dirDocDataOtherUser,
+                        {
+                            chatId: sha1(uids[0] + uids[1]),
+                            latestMsgTimestamp: new Date()
+                        }
+                    ]
+                })
             } else {
+                const dirDocRefsOtherUsers = JSON.parse(
+                    sessionStorage.getItem("other-user-uids")
+                ).map((uid) => doc(dirColRef, uid))
+                const dirDocDataOtherUsers = dirDocRefsOtherUsers.map(
+                    async (docRef) => (await getDoc(docRef)).data().chats
+                )
+                await setDoc(dirDocRefSelf, {
+                    chats: [
+                        ...dirDocDataSelf,
+                        {
+                            chatId: sha1(uids[0] + uids[1]),
+                            latestMsgTimestamp: new Date()
+                        }
+                    ]
+                })
+                dirDocRefsOtherUsers.map(
+                    async (docRef, i) =>
+                        await setDoc(docRef, {
+                            chats: [
+                                ...dirDocDataOtherUsers[i],
+                                {
+                                    chatId: sha1(uids[0] + uids[1]),
+                                    latestMsgTimestamp: new Date()
+                                }
+                            ]
+                        })
+                )
                 const otherUsers = participantsData.filter(
                     (participant) => participant.uid !== uid
                 )
@@ -255,7 +290,7 @@ function App() {
                 await setDoc(
                     dirDocRef,
                     {
-                        chats: arrayUnion(groupChatUid)
+                        chats: arrayUnion({ chatId: groupChatUid })
                     },
                     { merge: true }
                 )
