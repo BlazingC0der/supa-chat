@@ -21,7 +21,7 @@ import ChatModal from "./chat-modal"
 import ChatHeader from "./chat-header"
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBDYMJ3uhdyjeQegQDZnXVV-mCV91vH5uM",
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: "leapstartupearly-82067.firebaseapp.com",
     projectId: "leapstartupearly-82067",
     storageBucket: "leapstartupearly-82067.appspot.com",
