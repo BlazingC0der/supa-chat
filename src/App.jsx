@@ -117,10 +117,18 @@ function App() {
             sessionStorage.getItem("other-user-uid")
         ]
         const uids = [uid, otherUserUid].sort()
+        const chatUid = sha1(uids[0] + uids[1])
         try {
             const dirColRef = collection(firestore, "chat-directory")
             const dirDocRefSelf = doc(dirColRef, uid)
-            const dirDocDataSelf = (await getDoc(dirDocRefSelf)).data().chats
+            const dirDocDataSelf =
+                (await getDoc(dirDocRefSelf))
+                    .data()
+                    ?.chats?.filter(
+                        (chat) =>
+                            chat.chatId !==
+                            (groupMsg ? selectedChat.uid : chatUid)
+                    ) ?? []
             const chatColRef = collection(firestore, selectedChat.uid)
             const participantsDocRef = doc(chatColRef, "participants")
             const participantsData =
@@ -148,9 +156,10 @@ function App() {
                   })
             if (!groupMsg) {
                 const dirDocRefOtherUser = doc(dirColRef, otherUserUid)
-                const dirDocDataOtherUser = (
-                    await getDoc(dirDocRefOtherUser)
-                ).data().chats
+                const dirDocDataOtherUser =
+                    (await getDoc(dirDocRefOtherUser))
+                        .data()
+                        ?.chats?.filter((chat) => chat.chatId !== chatUid) ?? []
                 const otherUserUndreadMsgs = participantsData.filter(
                     (participant) => participant.uid === otherUserUid
                 )[0]?.unread
@@ -184,7 +193,7 @@ function App() {
                     chats: [
                         ...dirDocDataSelf,
                         {
-                            chatId: sha1(uids[0] + uids[1]),
+                            chatId: chatUid,
                             latestMsgTimestamp: new Date()
                         }
                     ]
@@ -193,7 +202,7 @@ function App() {
                     chats: [
                         ...dirDocDataOtherUser,
                         {
-                            chatId: sha1(uids[0] + uids[1]),
+                            chatId: chatUid,
                             latestMsgTimestamp: new Date()
                         }
                     ]
@@ -203,13 +212,18 @@ function App() {
                     sessionStorage.getItem("other-user-uids")
                 ).map((uid) => doc(dirColRef, uid))
                 const dirDocDataOtherUsers = dirDocRefsOtherUsers.map(
-                    async (docRef) => (await getDoc(docRef)).data().chats
+                    async (docRef) =>
+                        (await getDoc(docRef))
+                            .data()
+                            ?.chats?.filter(
+                                (chat) => chat.chatId !== selectedChat.uid
+                            ) ?? []
                 )
                 await setDoc(dirDocRefSelf, {
                     chats: [
                         ...dirDocDataSelf,
                         {
-                            chatId: sha1(uids[0] + uids[1]),
+                            chatId: selectedChat.uid,
                             latestMsgTimestamp: new Date()
                         }
                     ]
@@ -220,7 +234,7 @@ function App() {
                             chats: [
                                 ...dirDocDataOtherUsers[i],
                                 {
-                                    chatId: sha1(uids[0] + uids[1]),
+                                    chatId: selectedChat.uid,
                                     latestMsgTimestamp: new Date()
                                 }
                             ]

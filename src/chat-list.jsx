@@ -229,7 +229,18 @@ const ChatList = (props) => {
                 setChats(
                     [...tempChats.filter((user) => user !== null)].sort(
                         (chat1, chat2) =>
-                            new Date(chat2.date) - new Date(chat1.date)
+                            new Date(
+                                new Date(
+                                    chat2.timestamp?.seconds * 1000 +
+                                        chat2.timestamp?.nanoseconds / 1000000
+                                )
+                            ) -
+                            new Date(
+                                new Date(
+                                    chat1.timestamp?.seconds * 1000 +
+                                        chat1.timestamp?.nanoseconds / 1000000
+                                )
+                            )
                     )
                 )
                 sessionStorage.setItem("chats", JSON.stringify(tempChats))
